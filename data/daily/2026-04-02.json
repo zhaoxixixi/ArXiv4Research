@@ -1,0 +1,347 @@
+{
+  "date": "2026-04-02",
+  "count": 5,
+  "papers": [
+    {
+      "id": "oai:arXiv.org:2604.00243v1",
+      "title": "UCell: rethinking generalizability and scaling of bio-medical vision models",
+      "summary": "arXiv:2604.00243v1 Announce Type: cross  Abstract: The modern deep learning field is a scale-centric one. Larger models have been shown to consistently perform better than smaller models of similar architecture. In many sub-domains of biomedical research, however, the model scaling is bottlenecked by the amount of available training data, and the high cost associated with generating and validating additional high quality data. Despite the practical hurdle, the majority of the ongoing research still focuses on building bigger foundation models, whereas the alternative of improving the ability of small models has been under-explored. Here we experiment with building models with 10-30M parameters, tiny by modern standards, to perform the single-cell segmentation task. An important design choice is the incorporation of a recursive structure into the model's forward computation graph, leading to a more parameter-efficient architecture. We found that for the single-cell segmentation, on multiple benchmarks, our small model, UCell, matches the performance of models 10-20 times its size, and with a similar generalizability to unseen out-of-domain data. More importantly, we found that ucell can be trained from scratch using only a set of microscopy imaging data, without relying on massive pretraining on natural images, and therefore decouples the model building from any external commercial interests. Finally, we examined and confirmed the adaptability of ucell by performing a wide range of one-shot and few-shot fine tuning experiments on a diverse set of small datasets. Implementation is available at https://github.com/jiyuuchc/ucell",
+      "authors": [
+        "Nicholas Kuang",
+        "Vanessa Scalon",
+        "Ji Yu"
+      ],
+      "affiliations": [],
+      "categories": [
+        "cs.CV",
+        "q-bio.QM"
+      ],
+      "domain": "biology",
+      "published": "2026-04-02T00:00:00-04:00",
+      "link": "https://arxiv.org/abs/2604.00243",
+      "relevance_score": 0.739362,
+      "ai": {
+        "tldr": "UCell 是一种用于单细胞分割的小型递归模型（10-30M参数），性能媲美大10-20倍的模型，且无需大规模预训练。",
+        "motivation": "生物医学领域数据获取成本高、规模有限，主流的大模型路线面临瓶颈，因此探索提升小模型能力的替代方案。",
+        "method": "在模型前向计算图中引入递归结构，构建参数高效的架构，并在单细胞分割任务上进行训练和评估。",
+        "result": "UCell 在多个基准测试中与参数量大10-20倍的模型性能相当，泛化性相似，且仅需显微镜图像数据从头训练，无需依赖自然图像大规模预训练。",
+        "help_to_user": "为数据有限的生物医学视觉任务提供了一种高性能、轻量级、可独立训练的模型方案，降低对计算资源和外部预训练的依赖。",
+        "idea_spark": {
+          "transferable": true,
+          "idea": "在数据瓶颈领域，优先优化模型架构的效率而非盲目扩大规模。",
+          "risk": "小模型在更复杂或多样化的任务上可能仍存在性能上限。",
+          "inspiration": "挑战“规模至上”的范式，证明通过架构创新，小模型在特定领域可以取得与大模型竞争的结果。"
+        },
+        "bilingual": {
+          "zh": {
+            "tldr": "UCell 是一种用于单细胞分割的小型递归模型（10-30M参数），性能媲美大10-20倍的模型，且无需大规模预训练。",
+            "motivation": "生物医学领域数据获取成本高、规模有限，主流的大模型路线面临瓶颈，因此探索提升小模型能力的替代方案。",
+            "method": "在模型前向计算图中引入递归结构，构建参数高效的架构，并在单细胞分割任务上进行训练和评估。",
+            "result": "UCell 在多个基准测试中与参数量大10-20倍的模型性能相当，泛化性相似，且仅需显微镜图像数据从头训练，无需依赖自然图像大规模预训练。",
+            "help_to_user": "为数据有限的生物医学视觉任务提供了一种高性能、轻量级、可独立训练的模型方案，降低对计算资源和外部预训练的依赖。",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "在数据瓶颈领域，优先优化模型架构的效率而非盲目扩大规模。",
+              "risk": "小模型在更复杂或多样化的任务上可能仍存在性能上限。",
+              "inspiration": "挑战“规模至上”的范式，证明通过架构创新，小模型在特定领域可以取得与大模型竞争的结果。"
+            }
+          },
+          "en": {
+            "tldr": "UCell is a small recursive model (10-30M parameters) for single-cell segmentation that matches the performance of models 10-20x larger, without requiring massive pretraining.",
+            "motivation": "High cost and limited scale of data acquisition in biomedicine bottleneck the mainstream large-model approach, prompting exploration of alternatives to enhance small model capabilities.",
+            "method": "Incorporated a recursive structure into the model's forward computation graph to create a parameter-efficient architecture, trained and evaluated on the single-cell segmentation task.",
+            "result": "UCell performs on par with models having 10-20x more parameters on multiple benchmarks, with similar generalizability, and can be trained from scratch using only microscopy data without reliance on large-scale natural image pretraining.",
+            "help_to_user": "Provides a high-performance, lightweight, and independently trainable model solution for biomedical vision tasks with limited data, reducing dependence on computational resources and external pretraining.",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "In data-bottlenecked domains, prioritize optimizing model architecture efficiency over blindly scaling up model size.",
+              "risk": "Small models may still have performance ceilings on more complex or diverse tasks.",
+              "inspiration": "Challenges the 'scale-centric' paradigm, demonstrating that through architectural innovation, small models can achieve competitive results against large models in specific domains."
+            }
+          }
+        }
+      },
+      "code": {
+        "has_code": true,
+        "github": [
+          "https://github.com/jiyuuchc/ucell"
+        ],
+        "huggingface": [],
+        "colab": []
+      }
+    },
+    {
+      "id": "oai:arXiv.org:2510.16082v4",
+      "title": "BIOGEN: Evidence-Grounded Multi-Agent Reasoning Framework for Transcriptomic Interpretation in Antimicrobial Resistance",
+      "summary": "arXiv:2510.16082v4 Announce Type: replace  Abstract: Interpreting gene clusters derived from RNA sequencing (RNA-seq) remains a persistent challenge in functional genomics, particularly in antimicrobial resistance studies where mechanistic context is essential for downstream hypothesis generation. Conventional pathway enrichment methods summarize co-expressed modules using predefined functional categories, but they often provide limited coverage and do not yield cluster-specific mechanistic explanations grounded in primary literature. We present BIOGEN, an evidence-grounded multi-agent framework for post hoc interpretation of RNA-seq transcriptional modules that integrates biomedical retrieval, structured interpretation, and multi-critic verification. BIOGEN organizes knowledge from PubMed and UniProt into traceable cluster-level explanations with explicit evidence reporting and confidence tiering. On the primary Salmonella enterica dataset, BIOGEN achieved strong evidence grounding and biological coherence, with a BERTScore of 0.689, RAGAS Faithfulness of 0.930, Semantic Alignment Score of 0.715, and KEGG Functional Similarity of 0.342. All retrieval-grounded configurations maintained a hallucination rate of 0.000, compared with 0.100 for the LLM-only baseline. Across four additional bacterial RNA-seq datasets, BIOGEN preserved zero hallucinations and provided broader thematic coverage than KEGG/ORA-based enrichment. Comparative experiments with representative agentic AI baselines further show that retrieval access alone is insufficient to ensure traceable biological interpretation, highlighting the importance of coordinated evidence grounding and verification in biomedical reasoning.",
+      "authors": [
+        "Elias Hossain",
+        "Mehrdad Shoeibi",
+        "Ivan Garibay",
+        "Niloofar Yousefi"
+      ],
+      "affiliations": [],
+      "categories": [
+        "q-bio.QM",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "domain": "biology",
+      "published": "2026-04-02T00:00:00-04:00",
+      "link": "https://arxiv.org/abs/2510.16082",
+      "relevance_score": 0.735508,
+      "ai": {
+        "tldr": "BIOGEN是一个基于证据的多智能体框架，用于解释RNA-seq转录模块，通过整合生物医学检索、结构化解释和多批评验证，提供可追溯的、基于文献证据的机制解释，在抗菌素耐药性研究中实现零幻觉输出。",
+        "motivation": "传统的通路富集方法使用预定义功能类别总结共表达模块，但覆盖范围有限，且无法提供基于原始文献的、针对特定基因簇的机制解释。",
+        "method": "提出BIOGEN框架，整合来自PubMed和UniProt的生物医学知识，通过多智能体协作进行检索、结构化解释和验证，生成具有明确证据报告和置信度分级的可追溯解释。",
+        "result": "在鼠伤寒沙门氏菌数据集中，BERTScore为0.689，RAGAS忠实度为0.930，语义对齐分数为0.715，KEGG功能相似性为0.342。所有基于检索的配置幻觉率为0.000（仅LLM基线为0.100）。在四个额外细菌RNA-seq数据集中保持零幻觉，并提供比KEGG/ORA更广的主题覆盖。",
+        "help_to_user": "为功能基因组学研究者，特别是在抗菌素耐药性领域，提供了一个可追溯、基于证据的自动化工具，用于解释RNA-seq衍生的基因簇，减少幻觉并提高解释的生物学可信度。",
+        "idea_spark": {
+          "transferable": true,
+          "idea": "构建一个协调的智能体系统，专门负责证据检索、解释生成和交叉验证，确保每个结论都有可追溯的文献支持。",
+          "risk": "框架性能依赖于外部数据库（如PubMed、UniProt）的覆盖范围和更新及时性。对于新兴或高度专业化的研究主题，检索到的证据可能不足。",
+          "inspiration": "证明了在生物医学推理中，仅仅提供检索访问权限不足以确保可追溯的解释，协调的证据 grounding 和验证机制至关重要。这启发我们在设计AI辅助科学工具时，应优先考虑证据的透明度和可验证性。"
+        },
+        "bilingual": {
+          "zh": {
+            "tldr": "BIOGEN是一个基于证据的多智能体框架，用于解释RNA-seq转录模块，通过整合生物医学检索、结构化解释和多批评验证，提供可追溯的、基于文献证据的机制解释，在抗菌素耐药性研究中实现零幻觉输出。",
+            "motivation": "传统的通路富集方法使用预定义功能类别总结共表达模块，但覆盖范围有限，且无法提供基于原始文献的、针对特定基因簇的机制解释。",
+            "method": "提出BIOGEN框架，整合来自PubMed和UniProt的生物医学知识，通过多智能体协作进行检索、结构化解释和验证，生成具有明确证据报告和置信度分级的可追溯解释。",
+            "result": "在鼠伤寒沙门氏菌数据集中，BERTScore为0.689，RAGAS忠实度为0.930，语义对齐分数为0.715，KEGG功能相似性为0.342。所有基于检索的配置幻觉率为0.000（仅LLM基线为0.100）。在四个额外细菌RNA-seq数据集中保持零幻觉，并提供比KEGG/ORA更广的主题覆盖。",
+            "help_to_user": "为功能基因组学研究者，特别是在抗菌素耐药性领域，提供了一个可追溯、基于证据的自动化工具，用于解释RNA-seq衍生的基因簇，减少幻觉并提高解释的生物学可信度。",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "构建一个协调的智能体系统，专门负责证据检索、解释生成和交叉验证，确保每个结论都有可追溯的文献支持。",
+              "risk": "框架性能依赖于外部数据库（如PubMed、UniProt）的覆盖范围和更新及时性。对于新兴或高度专业化的研究主题，检索到的证据可能不足。",
+              "inspiration": "证明了在生物医学推理中，仅仅提供检索访问权限不足以确保可追溯的解释，协调的证据 grounding 和验证机制至关重要。这启发我们在设计AI辅助科学工具时，应优先考虑证据的透明度和可验证性。"
+            }
+          },
+          "en": {
+            "tldr": "BIOGEN is an evidence-grounded multi-agent framework for interpreting RNA-seq transcriptional modules. It integrates biomedical retrieval, structured interpretation, and multi-critic verification to provide traceable, literature-grounded mechanistic explanations, achieving zero hallucinations in antimicrobial resistance studies.",
+            "motivation": "Conventional pathway enrichment methods summarize co-expressed modules using predefined functional categories but offer limited coverage and fail to provide cluster-specific mechanistic explanations grounded in primary literature.",
+            "method": "Proposes the BIOGEN framework, which integrates biomedical knowledge from PubMed and UniProt. It employs multi-agent collaboration for retrieval, structured interpretation, and verification to generate traceable explanations with explicit evidence reporting and confidence tiering.",
+            "result": "On the primary Salmonella enterica dataset: BERTScore 0.689, RAGAS Faithfulness 0.930, Semantic Alignment Score 0.715, KEGG Functional Similarity 0.342. All retrieval-grounded configurations had a hallucination rate of 0.000 (vs. 0.100 for LLM-only baseline). Maintained zero hallucinations and provided broader thematic coverage than KEGG/ORA across four additional bacterial RNA-seq datasets.",
+            "help_to_user": "Provides functional genomics researchers, particularly in antimicrobial resistance, with a traceable, evidence-based automated tool for interpreting RNA-seq-derived gene clusters, reducing hallucinations and improving biological plausibility of explanations.",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "Constructing a coordinated agent system specifically tasked with evidence retrieval, explanation generation, and cross-verification to ensure every conclusion has traceable literature support.",
+              "risk": "Framework performance depends on the coverage and timeliness of external databases (e.g., PubMed, UniProt). For emerging or highly specialized research topics, retrieved evidence may be insufficient.",
+              "inspiration": "Demonstrates that in biomedical reasoning, retrieval access alone is insufficient to ensure traceable interpretation; coordinated evidence grounding and verification mechanisms are critical. This inspires prioritizing evidence transparency and verifiability when designing AI-assisted scientific tools."
+            }
+          }
+        }
+      },
+      "code": {
+        "has_code": false,
+        "github": [],
+        "huggingface": [],
+        "colab": []
+      }
+    },
+    {
+      "id": "oai:arXiv.org:2604.00065v1",
+      "title": "Genetic algorithms for multi-omic feature selection: a comparative study in cancer survival analysis",
+      "summary": "arXiv:2604.00065v1 Announce Type: new  Abstract: Multi-omic datasets offer opportunities for improved biomarker discovery in cancer research, but their high dimensionality and limited sample sizes make identifying compact and effective biomarker panels challenging. Feature selection in large-scale omics can be efficiently addressed by combining machine learning with genetic algorithms, which naturally support multi-objective optimization of predictive accuracy and biomarker set size. However, genetic algorithms remain relatively underexplored for multi-omic feature selection, where most approaches concatenate all layers into a single feature space. To address this limitation, we introduce Sweeping*, a multi-view, multi-objective algorithm alternating between single- and multi-view optimization. It employs a nested single-view multi-objective optimizer, and for this study we use the genetic algorithm NSGA3-CHS. It first identifies informative biomarkers within each layer, then jointly evaluates cross-layer interactions; these multi-omic solutions guide the next single-view search. Through repeated sweeps, the algorithm progressively identifies compact biomarker panels capturing cross-modal complementary signals. We benchmark five Sweeping* strategies, including hierarchical and concatenation-based variants, using survival prediction on three TCGA cohorts. Each strategy jointly optimizes predictive accuracy and set size, measured via the concordance index and root-leanness. Overall performance and estimation error are assessed through cross hypervolume and Pareto delta under 5-fold cross-validation. Our results show that Sweeping* can improve the accuracy-complexity trade-off when sufficient survival signal is present and that integrating omic layers can enhance survival prediction beyond clinical-only models, although benefits remain cohort-dependent.",
+      "authors": [
+        "Luca Cattelani",
+        "Vittorio Fortino"
+      ],
+      "affiliations": [
+        "\\orgdiv Institute of Biomedicine, School of Medicine, \\orgname University of Eastern Finland, \\orgaddress \\street Yliopistonranta 8, \\postcode 70210, \\country Finland"
+      ],
+      "categories": [
+        "q-bio.GN",
+        "cs.LG"
+      ],
+      "domain": "biology",
+      "published": "2026-04-02T00:00:00-04:00",
+      "link": "https://arxiv.org/abs/2604.00065",
+      "relevance_score": 0.704305,
+      "ai": {
+        "tldr": "提出Sweeping*算法，一种用于多组学特征选择的多视图多目标遗传算法，在癌症生存分析中优化预测精度与特征集大小的权衡。",
+        "motivation": "多组学数据维度高、样本少，现有方法常简单拼接各层特征，缺乏对跨层交互的联合优化，限制了生物标志物面板的发现。",
+        "method": "提出Sweeping*算法，交替进行单视图和多视图优化。使用NSGA3-CHS作为单视图多目标优化器，先在各组学层内筛选特征，再联合评估跨层交互，通过反复扫描逐步识别紧凑的生物标志物面板。",
+        "result": "在三个TCGA队列的生存预测中测试了五种Sweeping*策略。结果表明，当存在足够生存信号时，该算法能改善精度-复杂度权衡；整合多组学层能提升超越仅临床模型的预测性能，但效果因队列而异。",
+        "help_to_user": "提供了一种系统化的多组学特征选择框架，特别适用于需要平衡预测性能与生物标志物可解释性的癌症生存分析研究。",
+        "idea_spark": {
+          "transferable": true,
+          "idea": "将多组学特征选择分解为层内筛选与跨层联合评估的迭代过程，而非简单特征拼接。",
+          "risk": "性能提升依赖于队列中是否存在足够的生存相关信号，且计算成本可能较高。",
+          "inspiration": "启发将多目标优化与领域知识（如组学层结构）结合，设计更高效的多模态特征选择算法。"
+        },
+        "bilingual": {
+          "zh": {
+            "tldr": "提出Sweeping*算法，一种用于多组学特征选择的多视图多目标遗传算法，在癌症生存分析中优化预测精度与特征集大小的权衡。",
+            "motivation": "多组学数据维度高、样本少，现有方法常简单拼接各层特征，缺乏对跨层交互的联合优化，限制了生物标志物面板的发现。",
+            "method": "提出Sweeping*算法，交替进行单视图和多视图优化。使用NSGA3-CHS作为单视图多目标优化器，先在各组学层内筛选特征，再联合评估跨层交互，通过反复扫描逐步识别紧凑的生物标志物面板。",
+            "result": "在三个TCGA队列的生存预测中测试了五种Sweeping*策略。结果表明，当存在足够生存信号时，该算法能改善精度-复杂度权衡；整合多组学层能提升超越仅临床模型的预测性能，但效果因队列而异。",
+            "help_to_user": "提供了一种系统化的多组学特征选择框架，特别适用于需要平衡预测性能与生物标志物可解释性的癌症生存分析研究。",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "将多组学特征选择分解为层内筛选与跨层联合评估的迭代过程，而非简单特征拼接。",
+              "risk": "性能提升依赖于队列中是否存在足够的生存相关信号，且计算成本可能较高。",
+              "inspiration": "启发将多目标优化与领域知识（如组学层结构）结合，设计更高效的多模态特征选择算法。"
+            }
+          },
+          "en": {
+            "tldr": "Proposes Sweeping*, a multi-view multi-objective genetic algorithm for multi-omic feature selection, optimizing the trade-off between predictive accuracy and feature set size in cancer survival analysis.",
+            "motivation": "High dimensionality and limited samples in multi-omic data, coupled with prevalent simple concatenation approaches that lack joint optimization of cross-layer interactions, hinder the discovery of compact biomarker panels.",
+            "method": "Introduces the Sweeping* algorithm, which alternates between single-view and multi-view optimization. It employs NSGA3-CHS as a nested single-view multi-objective optimizer to first select features within each omic layer, then jointly evaluates cross-layer interactions, iteratively refining compact biomarker panels.",
+            "result": "Benchmarked five Sweeping* strategies on survival prediction across three TCGA cohorts. Results show the algorithm can improve the accuracy-complexity trade-off when sufficient survival signal is present, and integrating omic layers can enhance prediction beyond clinical-only models, though benefits are cohort-dependent.",
+            "help_to_user": "Provides a systematic framework for multi-omic feature selection, particularly useful for cancer survival analysis studies requiring a balance between predictive performance and biomarker interpretability.",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "Decompose multi-omic feature selection into an iterative process of within-layer screening and cross-layer joint evaluation, rather than simple feature concatenation.",
+              "risk": "Performance gains depend on the presence of sufficient survival-related signals in the cohort, and computational costs may be high.",
+              "inspiration": "Inspires the integration of multi-objective optimization with domain knowledge (e.g., omic layer structure) to design more efficient multimodal feature selection algorithms."
+            }
+          }
+        }
+      },
+      "code": {
+        "has_code": false,
+        "github": [],
+        "huggingface": [],
+        "colab": []
+      }
+    },
+    {
+      "id": "oai:arXiv.org:2604.00132v1",
+      "title": "Predicting Wave Reflection and Transmission in Heterogeneous Media via Fourier Operator-Based Transformer Modeling",
+      "summary": "arXiv:2604.00132v1 Announce Type: new  Abstract: We develop a machine learning (ML) surrogate model to approximate solutions to Maxwell's equations in one dimension, focusing on scenarios involving a material interface that reflects and transmits electro-magnetic waves. Derived from high-fidelity Finite Volume (FV) simulations, our training data includes variations of the initial conditions, as well as variations in one material's speed of light, allowing for the model to learn a range of wave-material interaction behaviors. The ML model autoregressively learns both the physical and frequency embeddings in a vision transformer-based framework. By incorporating Fourier transforms in the latent space, the wave number spectra of the solutions aligns closely with the simulation data. Prediction errors exhibit an approximately linear growth over time with a sharp increase at the material interface. Test results show that the ML solution has adequate relative errors below $10\\%$ in over $75$ time step rollouts, despite the presence of the discontinuity and unknown material properties.",
+      "authors": [
+        "Zhe Bai",
+        "Hans Johansen"
+      ],
+      "affiliations": [],
+      "categories": [
+        "cs.LG"
+      ],
+      "domain": "ai4science",
+      "published": "2026-04-02T00:00:00-04:00",
+      "link": "https://arxiv.org/abs/2604.00132",
+      "relevance_score": 0.638023,
+      "ai": {
+        "tldr": "开发基于傅里叶算子与视觉Transformer的机器学习代理模型，用于预测一维异质介质中电磁波的反射与透射行为。",
+        "motivation": "传统高保真有限体积模拟计算成本高，需开发高效代理模型处理含材料界面的麦克斯韦方程求解问题。",
+        "method": "基于有限体积模拟数据训练视觉Transformer框架，在隐空间引入傅里叶变换学习物理与频率嵌入，实现自回归预测。",
+        "result": "模型在75个时间步长内相对误差低于10%，误差随时间近似线性增长并在材料界面处显著上升。",
+        "help_to_user": "为波-材料相互作用提供快速预测工具，可处理未知材料属性和不连续界面场景。",
+        "idea_spark": {
+          "transferable": true,
+          "idea": "在Transformer隐空间强制频谱对齐，增强模型对波动本质特征的捕捉能力。",
+          "risk": "误差在材料界面处急剧增加，可能影响强不连续场景的长期预测稳定性。",
+          "inspiration": "结合物理嵌入与频谱约束的混合架构设计，为复杂介质波传播建模提供新范式。"
+        },
+        "bilingual": {
+          "zh": {
+            "tldr": "开发基于傅里叶算子与视觉Transformer的机器学习代理模型，用于预测一维异质介质中电磁波的反射与透射行为。",
+            "motivation": "传统高保真有限体积模拟计算成本高，需开发高效代理模型处理含材料界面的麦克斯韦方程求解问题。",
+            "method": "基于有限体积模拟数据训练视觉Transformer框架，在隐空间引入傅里叶变换学习物理与频率嵌入，实现自回归预测。",
+            "result": "模型在75个时间步长内相对误差低于10%，误差随时间近似线性增长并在材料界面处显著上升。",
+            "help_to_user": "为波-材料相互作用提供快速预测工具，可处理未知材料属性和不连续界面场景。",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "在Transformer隐空间强制频谱对齐，增强模型对波动本质特征的捕捉能力。",
+              "risk": "误差在材料界面处急剧增加，可能影响强不连续场景的长期预测稳定性。",
+              "inspiration": "结合物理嵌入与频谱约束的混合架构设计，为复杂介质波传播建模提供新范式。"
+            }
+          },
+          "en": {
+            "tldr": "Developed a Fourier operator-based vision transformer ML surrogate model to predict electromagnetic wave reflection and transmission in 1D heterogeneous media.",
+            "motivation": "High-fidelity finite volume simulations are computationally expensive, necessitating efficient surrogate models for solving Maxwell's equations with material interfaces.",
+            "method": "Trained a vision transformer framework on FV simulation data, incorporating Fourier transforms in latent space to learn physical and frequency embeddings for autoregressive prediction.",
+            "result": "The model maintains relative errors below 10% over 75 time steps, with errors growing approximately linearly in time and spiking sharply at material interfaces.",
+            "help_to_user": "Provides rapid prediction of wave-material interactions, capable of handling unknown material properties and discontinuous interfaces.",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "Enforcing spectral alignment in Transformer latent space enhances capture of essential wave characteristics.",
+              "risk": "Error sharp increase at material interfaces may affect long-term prediction stability in strongly discontinuous scenarios.",
+              "inspiration": "Hybrid architecture combining physical embeddings with spectral constraints offers a new paradigm for wave propagation modeling in complex media."
+            }
+          }
+        }
+      },
+      "code": {
+        "has_code": false,
+        "github": [],
+        "huggingface": [],
+        "colab": []
+      }
+    },
+    {
+      "id": "oai:arXiv.org:2604.00467v1",
+      "title": "Stiff-FCS: Single-Cell Stiffness Profiling With Integrated Molecular and Functional Analysis",
+      "summary": "arXiv:2604.00467v1 Announce Type: new  Abstract: Cell stiffness is a key determinant of how cells deform, migrate, and adapt to mechanically restrictive environments, yet existing single-cell stiffness assays remain difficult to combine with molecular analysis and downstream functional studies. To address these limitations, we introduce a microfluidic platform, stiffness-based ferrohydrodynamic cell sorting (Stiff-FCS), designed for high-throughput quantification of single-cell stiffness, on-chip molecular analysis, and post-assay cell recovery. Stiff-FCS combines ferrofluid-driven actuation with graded confinement channels to control cell movement, induce deformation, and spatially separate cells based on stiffness. An inverse computational model converts cell position and morphology into quantitative Young's modulus values. We demonstrate stiffness profiling of hundreds to thousands of cells per chip within minutes, same-cell fluorescence-based protein analysis, and recovery of stiffness-defined cells for downstream assays. Across diverse human and mouse cell lines, Lamin A/C showed the most consistent association with stiffness, whereas softer cells exhibited greater migratory capacity than stiffer cells. In a series of human head and neck cancer cell models, Stiff-FCS further resolved a stiff, less migratory subpopulation enriched in a higher-molecular-weight Vimentin state, offering a workflow for linking single-cell stiffness to molecular heterogeneity and cell behavior.",
+      "authors": [
+        "Yuhao Zhang",
+        "Luyao Zhao",
+        "Zhengfu Huang",
+        "Kenan Song",
+        "Xianqiao Wang",
+        "Xianyan Chen",
+        "Jin Xie",
+        "Yiping Zhao",
+        "He Li",
+        "Leidong Mao",
+        "Yong Teng",
+        "Yang Liu"
+      ],
+      "affiliations": [],
+      "categories": [
+        "q-bio.CB"
+      ],
+      "domain": "biology",
+      "published": "2026-04-02T00:00:00-04:00",
+      "link": "https://arxiv.org/abs/2604.00467",
+      "relevance_score": 0.636421,
+      "ai": {
+        "tldr": "开发了Stiff-FCS微流控平台，可高通量测量单细胞刚度，并整合分子分析与功能研究。",
+        "motivation": "现有单细胞刚度检测技术难以与分子分析和下游功能研究相结合。",
+        "method": "结合铁磁流体驱动与梯度限制通道，通过细胞位置和形态反演计算杨氏模量，实现基于刚度的细胞分选。",
+        "result": "在数分钟内完成数千细胞刚度分析，发现Lamin A/C与刚度相关性最强，较软细胞迁移能力更强，并在头颈癌细胞中鉴定出高刚度、低迁移的亚群。",
+        "help_to_user": "提供了一个将单细胞力学特性与分子表型、细胞行为关联的一体化工作流程。",
+        "idea_spark": {
+          "transferable": true,
+          "idea": "将力学刺激、形态响应与计算反演模型结合，实现无标记刚度定量。",
+          "risk": "依赖于特定微流控芯片与铁磁流体系统，可能限制广泛部署。",
+          "inspiration": "为力学微环境如何影响细胞命运（如迁移、分化）提供了单细胞尺度的研究工具。"
+        },
+        "bilingual": {
+          "zh": {
+            "tldr": "开发了Stiff-FCS微流控平台，可高通量测量单细胞刚度，并整合分子分析与功能研究。",
+            "motivation": "现有单细胞刚度检测技术难以与分子分析和下游功能研究相结合。",
+            "method": "结合铁磁流体驱动与梯度限制通道，通过细胞位置和形态反演计算杨氏模量，实现基于刚度的细胞分选。",
+            "result": "在数分钟内完成数千细胞刚度分析，发现Lamin A/C与刚度相关性最强，较软细胞迁移能力更强，并在头颈癌细胞中鉴定出高刚度、低迁移的亚群。",
+            "help_to_user": "提供了一个将单细胞力学特性与分子表型、细胞行为关联的一体化工作流程。",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "将力学刺激、形态响应与计算反演模型结合，实现无标记刚度定量。",
+              "risk": "依赖于特定微流控芯片与铁磁流体系统，可能限制广泛部署。",
+              "inspiration": "为力学微环境如何影响细胞命运（如迁移、分化）提供了单细胞尺度的研究工具。"
+            }
+          },
+          "en": {
+            "tldr": "Developed the Stiff-FCS microfluidic platform for high-throughput single-cell stiffness profiling integrated with molecular and functional analysis.",
+            "motivation": "Existing single-cell stiffness assays are difficult to combine with molecular analysis and downstream functional studies.",
+            "method": "Combines ferrofluid-driven actuation with graded confinement channels to sort cells by stiffness; uses an inverse computational model to derive Young's modulus from cell position and morphology.",
+            "result": "Profiled thousands of cells per chip within minutes; Lamin A/C most consistently associated with stiffness; softer cells showed greater migratory capacity; identified a stiff, less migratory subpopulation in head and neck cancer models.",
+            "help_to_user": "Provides an integrated workflow linking single-cell mechanical properties to molecular heterogeneity and cell behavior.",
+            "idea_spark": {
+              "transferable": true,
+              "idea": "Integrates mechanical stimulation, morphological response, and computational inverse modeling for label-free stiffness quantification.",
+              "risk": "Relies on specific microfluidic chip and ferrofluid systems, which may limit broad adoption.",
+              "inspiration": "Offers a tool to study how mechanical microenvironments influence cell fate (e.g., migration, differentiation) at single-cell resolution."
+            }
+          }
+        }
+      },
+      "code": {
+        "has_code": false,
+        "github": [],
+        "huggingface": [],
+        "colab": []
+      }
+    }
+  ]
+}

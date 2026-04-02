@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statistics · ArXiv Research Assistant</title>
+    <link rel="stylesheet" href="./styles/main.css" />
+    <link rel="stylesheet" href="./styles/statistics.css" />
+  </head>
+  <body data-theme="lavender">
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="header-main container">
+          <a class="project-pill" href="./index.html" aria-label="ArXiv4Research">
+            <span class="project-pill-dot"></span>
+            <span class="project-pill-text">ArXiv4Research</span>
+          </a>
+
+          <div class="brand-lockup">
+            <div class="brand-mark">AR</div>
+            <div class="brand-copy">
+              <h1>Statistics</h1>
+              <p class="sub">Popular keywords and cross-day topic overview</p>
+            </div>
+          </div>
+
+          <div class="header-actions">
+            <div class="date-chip">
+              <span id="date-trigger-text" class="header-date-text">加载中...</span>
+              <button
+                id="open-date-picker"
+                class="icon-pill header-icon-btn"
+                type="button"
+                title="选择日期或日期范围"
+                aria-label="选择日期或日期范围"
+              >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M19 4H18V2H16V4H8V2H6V4H5C3.9 4 3 4.9 3 6V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V6C21 4.9 20.1 4 19 4Z" stroke="currentColor" stroke-width="1.7" />
+                  <path d="M3 9H21" stroke="currentColor" stroke-width="1.7" />
+                  <path d="M8 12H12V16H8V12Z" fill="currentColor" opacity="0.18" />
+                </svg>
+              </button>
+            </div>
+            <a href="./index.html" class="icon-pill header-icon-btn nav-pill" title="返回日报主页" aria-label="返回日报主页">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main class="container statistics-page">
+        <section class="statistics-hero">
+          <h1>Statistics</h1>
+          <p>Analyze paper trends and popular topics</p>
+        </section>
+
+        <section class="statistics-panel panel">
+          <div id="statistics-summary" class="statistics-summary"></div>
+        </section>
+
+        <section class="statistics-section">
+          <h2 class="statistics-section-title">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21.41 11.58L12.41 2.58C12.05 2.22 11.55 2 11 2H4C2.9 2 2 2.9 2 4V11C2 11.55 2.22 12.05 2.59 12.42L11.59 21.42C11.95 21.78 12.45 22 13 22C13.55 22 14.05 21.78 14.41 21.41L21.41 14.41C21.78 14.05 22 13.55 22 13C22 12.45 21.77 11.94 21.41 11.58ZM5.5 7C4.67 7 4 6.33 4 5.5C4 4.67 4.67 4 5.5 4C6.33 4 7 4.67 7 5.5C7 6.33 6.33 7 5.5 7Z" fill="currentColor"/>
+            </svg>
+            Popular Keywords
+          </h2>
+          <div class="statistics-card panel">
+            <div id="keyword-list" class="keyword-list"></div>
+          </div>
+        </section>
+
+        <section id="related-section" class="statistics-section">
+          <h2 id="related-title" class="statistics-section-title">Related Papers</h2>
+          <div id="related-papers" class="related-papers"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="date-dialog" class="dialog">
+      <form method="dialog" class="panel date-dialog-panel">
+        <h3>选择统计范围</h3>
+        <p class="hint">支持单日统计，也支持按日期范围聚合多天结果。</p>
+
+        <section class="date-mode-section">
+          <div class="date-mode-toggle" role="group" aria-label="日期模式">
+            <button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">单日</button>
+            <button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">范围</button>
+          </div>
+        </section>
+
+        <section id="single-date-group" class="date-input-group">
+          <label for="single-date-input">选择日期</label>
+          <input id="single-date-input" type="date" />
+        </section>
+
+        <section id="range-date-group" class="date-range-grid">
+          <div class="date-input-group">
+            <label for="range-start-input">开始日期</label>
+            <input id="range-start-input" type="date" />
+          </div>
+          <div class="date-input-group">
+            <label for="range-end-input">结束日期</label>
+            <input id="range-end-input" type="date" />
+          </div>
+        </section>
+
+        <section class="date-quick-section">
+          <div class="section-head">
+            <strong>快速范围</strong>
+            <span id="date-dialog-availability" class="mini-hint"></span>
+          </div>
+          <div class="date-quick-actions">
+            <button type="button" class="template-btn date-quick-btn" data-range="latest">最新一天</button>
+            <button type="button" class="template-btn date-quick-btn" data-range="3">最近 3 天</button>
+            <button type="button" class="template-btn date-quick-btn" data-range="7">最近 7 天</button>
+            <button type="button" class="template-btn date-quick-btn" data-range="all">全部可用</button>
+          </div>
+        </section>
+
+        <menu class="actions">
+          <button id="apply-date-selection" type="button" class="btn">应用</button>
+          <button value="cancel" class="btn ghost">关闭</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="./scripts/statistics.js"></script>
+  </body>
+</html>

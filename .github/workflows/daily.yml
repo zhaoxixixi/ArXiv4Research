@@ -1,0 +1,58 @@
+name: arxiv-research-daily
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Prepare config
+        run: cp config/config.example.yaml config/config.yaml
+
+      - name: Run pipeline
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY }}
+          EMBEDDING_BASE_URL: ${{ secrets.EMBEDDING_BASE_URL }}
+        run: python scripts/run_pipeline.py --data-dir build/generated-data
+
+      - name: Build deployable site bundle
+        run: python scripts/build_site.py --source-data build/generated-data --output-dir build/site
+
+      - name: Publish to gh-pages orphan branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          rm -rf /tmp/arxiv4research-pages
+          mkdir -p /tmp/arxiv4research-pages
+          cp -R build/site/. /tmp/arxiv4research-pages/
+          cd /tmp/arxiv4research-pages
+          git init
+          git checkout --orphan gh-pages
+          git config user.name "${{ vars.NAME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.EMAIL || 'github-actions[bot]@users.noreply.github.com' }}"
+          git add --all
+          git commit -m "chore(pages): update daily arxiv site"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          git push --force origin gh-pages

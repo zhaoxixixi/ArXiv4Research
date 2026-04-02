@@ -1,0 +1,14 @@
+Materials/*
+# !Materials/Plan/
+# !Materials/Plan/**
+# !Materials/WorkLog/
+# !Materials/WorkLog/**
+Materials/api/
+Materials/OriginalPlan/
+Materials/RefCode/
+.env
+.env.*
+build/
+__pycache__/
+**/__pycache__/
+.codex

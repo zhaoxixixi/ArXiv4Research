@@ -1,0 +1,132 @@
+project:
+  title: ArXiv Research Assistant
+  top_k: 30
+  keep_days: 7
+  language: Chinese
+
+retrieval:
+  max_feed_items_per_category: 120
+  domains:
+    - name: biology
+      priority: 100
+      filter_mode: hard
+      categories:
+        - q-bio.BM
+        - q-bio.CB
+        - q-bio.GN
+        - q-bio.MN
+        - q-bio.NC
+        - q-bio.OT
+        - q-bio.PE
+        - q-bio.QM
+        - q-bio.SC
+        - q-bio.TO
+        - physics.bio-ph
+        - stat.AP
+      keywords:
+        - single-cell
+        - omics
+        - gene regulatory
+        - biological network
+        - cell state
+      cross_keywords:
+        - machine learning
+        - deep learning
+        - neural network
+        - transformer
+        - foundation model
+        - diffusion
+        - representation learning
+        - graph neural network
+        - computational
+        - algorithm
+    - name: ai4science
+      priority: 90
+      filter_mode: hard
+      categories:
+        - cs.AI
+        - cs.LG
+        - cs.RO
+        - eess.SP
+        - physics.comp-ph
+        - math.NA
+        - stat.ML
+      keywords:
+        - scientific machine learning
+        - surrogate model
+        - neural operator
+        - stochastic simulation
+        - cme
+    - name: math-physics
+      priority: 70
+      filter_mode: soft
+      categories:
+        - math.AP
+        - math.NA
+        - math.PR
+        - math-ph
+        - nlin.PS
+        - physics.data-an
+        - stat.ML
+      keywords:
+        - stochastic differential equation
+        - fokker-planck
+    - name: llm
+      priority: 50
+      filter_mode: soft
+      categories:
+        - cs.CL
+        - cs.AI
+        - cs.IR
+      keywords:
+        - language model
+        - reasoning
+    - name: cv
+      priority: 40
+      filter_mode: soft
+      categories:
+        - cs.CV
+        - cs.LG
+        - cs.MM
+        - eess.IV
+      keywords:
+        - diffusion
+        - vision transformer
+
+relevance:
+  research_context: >
+    Biology x Computer Science research focus; emphasize computational biology,
+    machine learning for biological systems, and transferable ML methods;
+    single-cell and biological dynamics;
+    surrogate modeling; trajectory prediction; SSA/CME; flow matching;
+    stochastic process simulation.
+  keywords:
+    - biology
+    - single-cell
+    - omics
+    - gene expression
+    - surrogate model
+    - neural operator
+    - flow matching
+    - trajectory prediction
+    - stochastic simulation
+    - SSA
+    - CME
+    - scientific machine learning
+  embedding_model: text-embedding-v4
+
+rerank:
+  mode: embedding_only
+  model: qwen3-rerank
+  pool_size: 60
+  instruct: >
+    Given a research profile, rank candidate arXiv papers by practical relevance,
+    transferability, and idea-generation potential.
+
+analysis:
+  model: deepseek-chat
+  temperature: 0.2
+
+affiliation:
+  llm_fallback_enabled: true
+  llm_fallback_model: deepseek-chat
