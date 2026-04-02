@@ -15,7 +15,13 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """You are a research assistant for AI4Science.
 Return strict JSON only.
-Top-level keys must be exactly: zh, en.
+Top-level keys must be exactly: affiliations, zh, en.
+
+For affiliations:
+- return a concise list of institution / department / laboratory names
+- remove street addresses, room numbers, postcodes, emails, URLs, and author-note noise
+- do not invent affiliations unsupported by the provided candidates
+- if unsure, return an empty list
 
 For both zh and en, include keys:
 tldr, motivation, method, result, help_to_user, idea_spark.
@@ -217,6 +223,14 @@ def _normalize_analysis_payload(data: dict, language: str, fallback_text: str = 
     return normalized
 
 
+def _normalize_analysis_result(data: dict | None, language: str, fallback_text: str = "") -> tuple[dict, list[str]]:
+    payload = data if isinstance(data, dict) else {}
+    return (
+        _normalize_analysis_payload(payload, language, fallback_text=fallback_text),
+        _normalize_affiliation_list_payload(payload),
+    )
+
+
 def _dedupe_text_list(items: list[str]) -> list[str]:
     seen: set[str] = set()
     ordered: list[str] = []
@@ -332,13 +346,16 @@ def maybe_refine_affiliations_with_llm(
     return current
 
 
-def analyze_paper(client: OpenAI, paper: Paper, model: str, language: str, temperature: float) -> dict:
+def analyze_paper(client: OpenAI, paper: Paper, model: str, language: str, temperature: float) -> tuple[dict, list[str]]:
     user_prompt = (
         f"Preferred UI language: {language}\n"
         f"Title: {paper.title}\n"
         f"Abstract: {paper.summary}\n"
+        f"Authors: {json.dumps(paper.authors or [], ensure_ascii=False)}\n"
         f"Domain: {paper.domain}\n"
-        "Return bilingual JSON only with both zh and en."
+        f"Current extracted affiliations: {json.dumps(paper.affiliations or [], ensure_ascii=False)}\n"
+        f"Raw affiliation candidates: {json.dumps((paper.affiliation_evidence or [])[:8], ensure_ascii=False)}\n"
+        "Return strict JSON only with top-level keys affiliations, zh, en."
     )
     response = client.chat.completions.create(
         model=model,
@@ -352,11 +369,11 @@ def analyze_paper(client: OpenAI, paper: Paper, model: str, language: str, tempe
     try:
         data = json.loads(content)
         if isinstance(data, dict):
-            return _normalize_analysis_payload(data, language)
+            return _normalize_analysis_result(data, language)
     except json.JSONDecodeError:
         pass
 
-    return _normalize_analysis_payload({}, language, fallback_text=content.strip())
+    return _normalize_analysis_result({}, language, fallback_text=content.strip())
 
 
 def followup_answer(client: OpenAI, model: str, temperature: float, language: str, paper: Paper, question: str, research_context: str) -> str:

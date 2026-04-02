@@ -38,20 +38,23 @@ def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data"
     enrich_affiliations(top)
 
     for paper in top:
-        paper.affiliations = maybe_refine_affiliations_with_llm(
-            client=chat_client,
-            paper=paper,
-            model=cfg.affiliation_llm_fallback_model,
-            enabled=cfg.affiliation_llm_fallback_enabled,
-        )
         paper.code = sniff_code_links(paper)
-        paper.ai = analyze_paper(
+        paper.ai, analyzed_affiliations = analyze_paper(
             client=chat_client,
             paper=paper,
             model=cfg.analysis_model,
             language=cfg.language,
             temperature=cfg.analysis_temperature,
         )
+        if analyzed_affiliations:
+            paper.affiliations = analyzed_affiliations
+        else:
+            paper.affiliations = maybe_refine_affiliations_with_llm(
+                client=chat_client,
+                paper=paper,
+                model=cfg.affiliation_llm_fallback_model,
+                enabled=cfg.affiliation_llm_fallback_enabled,
+            )
 
     today = datetime.now(timezone.utc)
     write_daily_snapshot(base_dir=data_dir, papers=top, today=today)

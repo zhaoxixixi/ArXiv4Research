@@ -1,11 +1,12 @@
 project:
-  title: ArXiv Research Assistant
-  top_k: 30
+  title: ArXiv Research Assistant (Local Test)
+  top_k: 5
   keep_days: 7
   language: Chinese
 
 retrieval:
-  max_feed_items_per_category: 120
+  # 本地测试默认使用较小抓取规模，便于快速验证页面与 pipeline 效果
+  max_feed_items_per_category: 20
   domains:
     - name: biology
       priority: 100
@@ -116,9 +117,9 @@ relevance:
   embedding_model: text-embedding-v4
 
 rerank:
-  mode: embedding_only
+  mode: embedding_plus_qwen3_rerank
   model: qwen3-rerank
-  pool_size: 60
+  pool_size: 20
   instruct: >
     Given a research profile, rank candidate arXiv papers by practical relevance,
     transferability, and idea-generation potential.

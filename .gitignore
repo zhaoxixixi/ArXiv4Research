@@ -10,7 +10,6 @@ Materials/RefCode/
 
 # Local runtime configs / generated data
 config/config.yaml
-config/config.dev.yaml
 data/
 
 # Local editor / environment files

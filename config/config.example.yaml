@@ -118,7 +118,7 @@ relevance:
   embedding_model: text-embedding-v4
 
 rerank:
-  mode: embedding_only
+  mode: embedding_plus_qwen3_rerank
   model: qwen3-rerank
   pool_size: 60
   instruct: >
