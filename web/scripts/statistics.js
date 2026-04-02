@@ -39,6 +39,48 @@ function derivePdfUrl(link) {
   return replaced.endsWith(".pdf") ? replaced : `${replaced}.pdf`;
 }
 
+function isPointInsideRect(x, y, rect) {
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
+function resolveDialogPanel(dialog) {
+  return dialog?.querySelector(".dialog-panel") || dialog?.querySelector(".panel") || dialog?.firstElementChild || null;
+}
+
+function enableDialogOutsideClose(dialog) {
+  if (!dialog) return;
+
+  let pointerStartedOutside = false;
+
+  dialog.addEventListener("pointerdown", (event) => {
+    if (!dialog.open) return;
+    const panel = resolveDialogPanel(dialog);
+    if (!panel) return;
+    pointerStartedOutside = !isPointInsideRect(event.clientX, event.clientY, panel.getBoundingClientRect());
+  });
+
+  dialog.addEventListener("click", (event) => {
+    if (!dialog.open) return;
+    const panel = resolveDialogPanel(dialog);
+    if (!panel) return;
+
+    if (panel.contains(event.target)) {
+      pointerStartedOutside = false;
+      return;
+    }
+
+    const clickedOutside = !isPointInsideRect(event.clientX, event.clientY, panel.getBoundingClientRect());
+    if (pointerStartedOutside && clickedOutside) {
+      dialog.close();
+    }
+    pointerStartedOutside = false;
+  });
+
+  dialog.addEventListener("close", () => {
+    pointerStartedOutside = false;
+  });
+}
+
 const THEME_STORAGE_KEY = "ara_theme";
 const DEFAULT_THEME = "lavender";
 const KEYWORD_STOPWORDS = new Set([
@@ -270,10 +312,30 @@ function aggregateDailyPayloads(payloads) {
   });
 }
 
+function normalizeKeywordLabel(keyword) {
+  return String(keyword || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9+\-/ ]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getPaperKeywordMeta(paper) {
+  const normalized = Array.from(new Set((paper?.ai?.keywords_normalized || []).map(normalizeKeywordLabel).filter(Boolean)));
+  const raw = Array.from(new Set((paper?.ai?.keywords_raw || []).map(normalizeKeywordLabel).filter(Boolean)));
+  return { normalized, raw };
+}
+
 function extractKeywordRanking(papers, limit = 18) {
+  const aiKeywordCounts = new Map();
   const phraseCounts = new Map();
 
   papers.forEach((paper) => {
+    const { normalized } = getPaperKeywordMeta(paper);
+    normalized.forEach((keyword) => {
+      aiKeywordCounts.set(keyword, (aiKeywordCounts.get(keyword) || 0) + 1);
+    });
+
     const normalizedTitle = String(paper.title || "")
       .toLowerCase()
       .replace(/[^a-z0-9+\-/ ]+/g, " ");
@@ -291,6 +353,15 @@ function extractKeywordRanking(papers, limit = 18) {
       }
     }
   });
+
+  const aiKeywordEntries = Array.from(aiKeywordCounts.entries())
+    .filter(([, count]) => count >= (papers.length >= 8 ? 2 : 1))
+    .map(([label, count]) => ({ label, count, score: count * 3 }))
+    .sort((a, b) => b.score - a.score || b.count - a.count || a.label.localeCompare(b.label));
+
+  if (aiKeywordEntries.length) {
+    return aiKeywordEntries.slice(0, limit).map(({ label, count }) => ({ label, count }));
+  }
 
   const ranked = Array.from(phraseCounts.entries())
     .filter(([phrase, count]) => count >= (phrase.includes(" ") ? 2 : 2) && !/^\d+$/.test(phrase))
@@ -330,9 +401,13 @@ function renderRelatedPapers(keyword) {
   const container = document.getElementById("related-papers");
   if (!container || !relatedTitle) return;
 
-  const matched = currentPapers.filter((paper) =>
-    `${paper.title || ""} ${paper.summary || ""}`.toLowerCase().includes(keyword.toLowerCase()),
-  );
+  const normalizedKeyword = normalizeKeywordLabel(keyword);
+  const matched = currentPapers.filter((paper) => {
+    const { normalized, raw } = getPaperKeywordMeta(paper);
+    if (normalized.includes(normalizedKeyword)) return true;
+    if (raw.some((item) => item.includes(normalizedKeyword) || normalizedKeyword.includes(item))) return true;
+    return `${paper.title || ""} ${paper.summary || ""}`.toLowerCase().includes(normalizedKeyword);
+  });
 
   relatedTitle.textContent = `Related Papers · ${keyword}`;
 
@@ -430,6 +505,7 @@ async function main() {
   const index = await resolveDataBasePath();
   availableDates = [...(index.dates || [])];
   dateDialog = document.getElementById("date-dialog");
+  enableDialogOutsideClose(dateDialog);
 
   const initial = index.latest || availableDates[0];
   if (!initial) {

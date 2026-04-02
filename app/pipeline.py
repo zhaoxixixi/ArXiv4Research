@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from .ai_client import analyze_paper, build_embedding_client, build_openai_client, maybe_refine_affiliations_with_llm
 from .arxiv_client import enrich_affiliations, fetch_latest_by_categories
 from .config import load_config
-from .rerank import rank_papers
+from .rerank import rank_papers, select_top_papers_balanced
 from .sniffer import sniff_code_links
 from .storage import prune_daily_files, write_daily_snapshot, write_index, write_search_index
 
@@ -34,7 +34,11 @@ def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data"
         rerank_pool_size=cfg.rerank_pool_size,
         rerank_instruct=cfg.rerank_instruct,
     )
-    top = ranked[: cfg.top_k]
+    top = select_top_papers_balanced(
+        ranked_papers=ranked,
+        top_k=cfg.top_k,
+        domains=cfg.domains,
+    )
     enrich_affiliations(top)
 
     for paper in top:

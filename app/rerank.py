@@ -159,3 +159,59 @@ def rank_papers(
 
     logger.warning("Unknown rerank mode '%s'; fallback to embedding_only.", rerank_mode)
     return ranked
+
+
+def select_top_papers_balanced(
+    ranked_papers: list[Paper],
+    top_k: int,
+    domains: list[DomainBucket],
+) -> list[Paper]:
+    if top_k <= 0 or not ranked_papers:
+        return []
+
+    if len(ranked_papers) <= top_k:
+        return ranked_papers
+
+    domain_priority = {domain.name: domain.priority for domain in domains}
+    active_domains = sorted(
+        {paper.domain for paper in ranked_papers if paper.domain in domain_priority},
+        key=lambda name: domain_priority.get(name, 0),
+        reverse=True,
+    )
+    if not active_domains:
+        return ranked_papers[:top_k]
+
+    quotas = {name: 0 for name in active_domains}
+    base_quota, remainder = divmod(top_k, len(active_domains))
+    for name in active_domains:
+        quotas[name] = base_quota
+    for name in active_domains[:remainder]:
+        quotas[name] += 1
+
+    buckets: dict[str, list[Paper]] = {name: [] for name in active_domains}
+    for paper in ranked_papers:
+        if paper.domain in buckets:
+            buckets[paper.domain].append(paper)
+
+    selected: list[Paper] = []
+    selected_ids: set[str] = set()
+
+    for domain_name in active_domains:
+        for paper in buckets.get(domain_name, [])[: quotas[domain_name]]:
+            if paper.paper_id in selected_ids:
+                continue
+            selected.append(paper)
+            selected_ids.add(paper.paper_id)
+
+    if len(selected) >= top_k:
+        return sorted(selected, key=lambda paper: paper.relevance_score, reverse=True)[:top_k]
+
+    for paper in ranked_papers:
+        if paper.paper_id in selected_ids:
+            continue
+        selected.append(paper)
+        selected_ids.add(paper.paper_id)
+        if len(selected) >= top_k:
+            break
+
+    return sorted(selected, key=lambda paper: paper.relevance_score, reverse=True)[:top_k]

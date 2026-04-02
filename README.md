@@ -1,6 +1,6 @@
 # ArXiv4Research
 
-一个静态 Web 项目：每日抓取 arXiv，按领域桶（含 Biology 优先）筛选最相关 Top-30，调用可配置 AI（DeepSeek/OpenAI-compatible）分析，并仅保留最近 7 天数据供页面切换查看。
+一个静态 Web 项目：每日抓取 arXiv，按领域桶（含 Biology 优先）筛选候选论文，先做全局相关性排序，再按 **domain 保底 + 全局补齐** 生成最终 Top-K 日报，调用可配置 AI（DeepSeek/OpenAI-compatible）分析，并仅保留最近 7 天数据供页面切换查看。
 
 补充文档：
 
@@ -83,7 +83,8 @@
 
 ## 关键能力映射
 
-- 每日 Top-30：`project.top_k = 30`
+- 每日 Top-K：`project.top_k`
+- 最终选稿：先全局 ranking，再按 domain 保底 + 全局补齐
 - 召回排序：`relevance.embedding_model` + embedding API
 - 精排模式：`rerank.mode = embedding_only | embedding_plus_qwen3_rerank`
 - 每篇 AI 分析：`analysis.model` + Chat API（可用 DeepSeek）

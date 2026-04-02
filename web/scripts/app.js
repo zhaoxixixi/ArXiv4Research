@@ -39,6 +39,14 @@ function formatAffiliations(affiliations = [], maxCount = 3) {
   return `${affiliations.slice(0, maxCount).join("；")} 等`;
 }
 
+function getDisplayKeywords(ai = {}, maxCount = 6) {
+  const normalized = Array.isArray(ai?.keywords_normalized) ? ai.keywords_normalized : [];
+  const raw = Array.isArray(ai?.keywords_raw) ? ai.keywords_raw : [];
+  const preferred = normalized.length ? normalized : raw;
+  if (!preferred.length) return "";
+  return preferred.slice(0, maxCount).join("；");
+}
+
 function formatPublished(value) {
   if (!value) return "未知";
   const date = new Date(value);
@@ -63,6 +71,48 @@ function deriveHtmlUrl(link) {
 
 function findPrimaryCodeLink(code = {}) {
   return code.github?.[0] || code.huggingface?.[0] || code.colab?.[0] || "";
+}
+
+function isPointInsideRect(x, y, rect) {
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
+function resolveDialogPanel(dialog) {
+  return dialog?.querySelector(".dialog-panel") || dialog?.querySelector(".panel") || dialog?.firstElementChild || null;
+}
+
+function enableDialogOutsideClose(dialog) {
+  if (!dialog) return;
+
+  let pointerStartedOutside = false;
+
+  dialog.addEventListener("pointerdown", (event) => {
+    if (!dialog.open) return;
+    const panel = resolveDialogPanel(dialog);
+    if (!panel) return;
+    pointerStartedOutside = !isPointInsideRect(event.clientX, event.clientY, panel.getBoundingClientRect());
+  });
+
+  dialog.addEventListener("click", (event) => {
+    if (!dialog.open) return;
+    const panel = resolveDialogPanel(dialog);
+    if (!panel) return;
+
+    if (panel.contains(event.target)) {
+      pointerStartedOutside = false;
+      return;
+    }
+
+    const clickedOutside = !isPointInsideRect(event.clientX, event.clientY, panel.getBoundingClientRect());
+    if (pointerStartedOutside && clickedOutside) {
+      dialog.close();
+    }
+    pointerStartedOutside = false;
+  });
+
+  dialog.addEventListener("close", () => {
+    pointerStartedOutside = false;
+  });
 }
 
 function normalizePaperId(id) {
@@ -525,10 +575,28 @@ function syncDomainOptions() {
 }
 
 function extractKeywordRanking(papers, limit = 18) {
+  const aiKeywordCounts = new Map();
   const phraseCounts = new Map();
   const wordCounts = new Map();
 
   papers.forEach((paper) => {
+    const normalizedKeywords = Array.from(
+      new Set(
+        (paper?.ai?.keywords_normalized || [])
+          .map((keyword) =>
+            String(keyword || "")
+              .toLowerCase()
+              .replace(/[^a-z0-9+\-/ ]+/g, " ")
+              .replace(/\s+/g, " ")
+              .trim(),
+          )
+          .filter(Boolean),
+      ),
+    );
+    normalizedKeywords.forEach((keyword) => {
+      aiKeywordCounts.set(keyword, (aiKeywordCounts.get(keyword) || 0) + 1);
+    });
+
     const title = String(paper.title || "")
       .toLowerCase()
       .replace(/[^a-z0-9+\-/ ]+/g, " ");
@@ -550,6 +618,15 @@ function extractKeywordRanking(papers, limit = 18) {
       }
     }
   });
+
+  const aiKeywordEntries = Array.from(aiKeywordCounts.entries())
+    .filter(([, count]) => count >= (papers.length >= 8 ? 2 : 1))
+    .map(([label, count]) => ({ label, count, score: count * 3 }))
+    .sort((a, b) => b.score - a.score || b.count - a.count || a.label.localeCompare(b.label));
+
+  if (aiKeywordEntries.length) {
+    return aiKeywordEntries.slice(0, limit).map(({ label, count }) => ({ label, count }));
+  }
 
   const phraseEntries = Array.from(phraseCounts.entries())
     .filter(([, count]) => count >= (papers.length >= 8 ? 2 : 1))
@@ -1191,6 +1268,10 @@ function renderPaperModal(paper) {
             <div class="detail-value">${escapeHtml((paper.report_dates || [paper.source_date || currentDate]).join("，"))}</div>
           </div>
           <div>
+            <div class="detail-label">主题关键词</div>
+            <div class="detail-value">${escapeHtml(getDisplayKeywords(paper.ai || {}) || "当前数据中暂无关键词")}</div>
+          </div>
+          <div>
             <div class="detail-label">代码状态</div>
             <div class="detail-value">${(paper.code || {}).has_code ? "已检测到代码链接" : "未检测到代码链接"}</div>
           </div>
@@ -1475,6 +1556,7 @@ async function main() {
   paperModal = document.getElementById("paper-modal");
   themeDialog = document.getElementById("theme-dialog");
   dateDialog = document.getElementById("date-dialog");
+  [settingsDialog, themeDialog, dateDialog].forEach((dialog) => enableDialogOutsideClose(dialog));
   renderStatus();
   syncDateDialog();
 

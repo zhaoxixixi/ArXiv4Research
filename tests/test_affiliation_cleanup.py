@@ -109,6 +109,16 @@ class AffiliationCleanupTests(unittest.TestCase):
               "affiliations": [
                 "Institute of Biomedicine, School of Medicine, University of Eastern Finland"
               ],
+              "keywords_raw": [
+                "diffusion MRI",
+                "fixel recovery",
+                "analysis-by-synthesis"
+              ],
+              "keywords_normalized": [
+                "diffusion",
+                "medical imaging",
+                "inverse problem"
+              ],
               "zh": {
                 "tldr": "中文摘要",
                 "motivation": "中文动机",
@@ -143,6 +153,8 @@ class AffiliationCleanupTests(unittest.TestCase):
         )
         self.assertEqual(analysis["tldr"], "中文摘要")
         self.assertEqual(analysis["bilingual"]["en"]["tldr"], "English TLDR")
+        self.assertEqual(analysis["keywords_raw"], ["diffusion mri", "fixel recovery", "analysis-by-synthesis"])
+        self.assertEqual(analysis["keywords_normalized"], ["diffusion", "medical imaging", "inverse problem"])
 
     def test_analysis_call_keeps_summary_even_without_affiliations(self) -> None:
         paper = Paper(
@@ -157,6 +169,8 @@ class AffiliationCleanupTests(unittest.TestCase):
         client = _FakeClient(
             """
             {
+              "keywords_raw": ["diffusion model"],
+              "keywords_normalized": ["diffusion"],
               "zh": {"tldr": "只有摘要", "motivation": "", "method": "", "result": "", "help_to_user": "", "idea_spark": {}},
               "en": {"tldr": "summary only", "motivation": "", "method": "", "result": "", "help_to_user": "", "idea_spark": {}}
             }
@@ -173,6 +187,41 @@ class AffiliationCleanupTests(unittest.TestCase):
 
         self.assertEqual(affiliations, [])
         self.assertEqual(analysis["tldr"], "只有摘要")
+        self.assertEqual(analysis["keywords_raw"], ["diffusion model"])
+        self.assertEqual(analysis["keywords_normalized"], ["diffusion"])
+
+    def test_analysis_keywords_normalized_can_merge_parent_child_duplicates(self) -> None:
+        paper = Paper(
+            paper_id="2604.00069",
+            title="Diffusion imaging paper",
+            summary="Test summary",
+            authors=["A. Author"],
+            categories=["q-bio.BM"],
+            published="2026-04-02T00:00:00Z",
+            link="https://arxiv.org/abs/2604.00069",
+        )
+        client = _FakeClient(
+            """
+            {
+              "keywords_raw": ["diffusion MRI", "diffusion model", "fixel recovery"],
+              "keywords_normalized": ["diffusion model", "diffusion", "medical imaging"],
+              "zh": {"tldr": "中文摘要", "motivation": "", "method": "", "result": "", "help_to_user": "", "idea_spark": {}},
+              "en": {"tldr": "English summary", "motivation": "", "method": "", "result": "", "help_to_user": "", "idea_spark": {}}
+            }
+            """
+        )
+
+        analysis, affiliations = analyze_paper(
+            client=client,
+            paper=paper,
+            model="deepseek-chat",
+            language="Chinese",
+            temperature=0.2,
+        )
+
+        self.assertEqual(affiliations, [])
+        self.assertEqual(analysis["keywords_raw"], ["diffusion mri", "diffusion model", "fixel recovery"])
+        self.assertEqual(analysis["keywords_normalized"], ["diffusion", "medical imaging"])
 
 
 if __name__ == "__main__":

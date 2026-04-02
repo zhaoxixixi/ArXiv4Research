@@ -80,34 +80,39 @@
     </div>
 
     <dialog id="date-dialog" class="dialog">
-      <form method="dialog" class="panel date-dialog-panel">
-        <h3>选择统计范围</h3>
-        <p class="hint">支持单日统计，也支持按日期范围聚合多天结果。</p>
+      <form method="dialog" class="panel dialog-panel date-dialog-panel">
+        <div class="dialog-header-block">
+          <div class="dialog-kicker">Daily Scope</div>
+          <h3>选择统计日期</h3>
+          <p class="dialog-lead">支持单日统计，也支持按日期范围聚合多天结果，整体风格与主页日报面板保持一致。</p>
+        </div>
 
-        <section class="date-mode-section">
-          <div class="date-mode-toggle" role="group" aria-label="日期模式">
-            <button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">单日</button>
-            <button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">范围</button>
+        <section class="dialog-card">
+          <div class="date-mode-section">
+            <div class="date-mode-toggle" role="group" aria-label="日期模式">
+              <button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">单日</button>
+              <button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">范围</button>
+            </div>
           </div>
+
+          <section id="single-date-group" class="date-input-group">
+            <label for="single-date-input">选择日期</label>
+            <input id="single-date-input" type="date" />
+          </section>
+
+          <section id="range-date-group" class="date-range-grid">
+            <div class="date-input-group">
+              <label for="range-start-input">开始日期</label>
+              <input id="range-start-input" type="date" />
+            </div>
+            <div class="date-input-group">
+              <label for="range-end-input">结束日期</label>
+              <input id="range-end-input" type="date" />
+            </div>
+          </section>
         </section>
 
-        <section id="single-date-group" class="date-input-group">
-          <label for="single-date-input">选择日期</label>
-          <input id="single-date-input" type="date" />
-        </section>
-
-        <section id="range-date-group" class="date-range-grid">
-          <div class="date-input-group">
-            <label for="range-start-input">开始日期</label>
-            <input id="range-start-input" type="date" />
-          </div>
-          <div class="date-input-group">
-            <label for="range-end-input">结束日期</label>
-            <input id="range-end-input" type="date" />
-          </div>
-        </section>
-
-        <section class="date-quick-section">
+        <section class="dialog-card date-quick-card">
           <div class="section-head">
             <strong>快速范围</strong>
             <span id="date-dialog-availability" class="mini-hint"></span>
@@ -120,9 +125,9 @@
           </div>
         </section>
 
-        <menu class="actions">
-          <button id="apply-date-selection" type="button" class="btn">应用</button>
-          <button value="cancel" class="btn ghost">关闭</button>
+        <menu class="dialog-actions">
+          <button value="cancel" class="btn ghost dialog-secondary-btn">关闭</button>
+          <button id="apply-date-selection" type="button" class="btn dialog-primary-btn">应用到统计页</button>
         </menu>
       </form>
     </dialog>

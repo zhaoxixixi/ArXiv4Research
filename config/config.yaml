@@ -12,16 +12,10 @@ retrieval:
       priority: 100
       filter_mode: hard
       categories:
-        - q-bio.BM
-        - q-bio.CB
         - q-bio.GN
         - q-bio.MN
-        - q-bio.NC
-        - q-bio.OT
-        - q-bio.PE
         - q-bio.QM
-        - q-bio.SC
-        - q-bio.TO
+        - q-bio.CB
         - physics.bio-ph
         - stat.AP
       keywords:
@@ -47,7 +41,9 @@ retrieval:
       categories:
         - cs.AI
         - cs.LG
-        - cs.RO
+        - cs.CE
+        - cs.NE
+        - cs.SY
         - eess.SP
         - physics.comp-ph
         - math.NA
@@ -63,12 +59,11 @@ retrieval:
       filter_mode: soft
       categories:
         - math.AP
-        - math.NA
         - math.PR
+        - math.OC
         - math-ph
         - nlin.PS
         - physics.data-an
-        - stat.ML
       keywords:
         - stochastic differential equation
         - fokker-planck
@@ -87,7 +82,6 @@ retrieval:
       filter_mode: soft
       categories:
         - cs.CV
-        - cs.LG
         - cs.MM
         - eess.IV
       keywords:

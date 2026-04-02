@@ -15,13 +15,23 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """You are a research assistant for AI4Science.
 Return strict JSON only.
-Top-level keys must be exactly: affiliations, zh, en.
+Top-level keys must be exactly: affiliations, keywords_raw, keywords_normalized, zh, en.
 
 For affiliations:
 - return a concise list of institution / department / laboratory names
 - remove street addresses, room numbers, postcodes, emails, URLs, and author-note noise
 - do not invent affiliations unsupported by the provided candidates
 - if unsure, return an empty list
+
+For keywords_raw:
+- return 3 to 8 paper-specific topic phrases
+- keep them concrete and close to the paper itself
+
+For keywords_normalized:
+- return 3 to 6 normalized topic labels suitable for cross-paper aggregation
+- prefer broader, stable research themes over overly specific paper phrases
+- do not output obvious parent/child near-duplicates together
+- for example, if a raw keyword is "diffusion MRI", normalized keywords may be "diffusion" and "medical imaging"
 
 For both zh and en, include keys:
 tldr, motivation, method, result, help_to_user, idea_spark.
@@ -47,6 +57,24 @@ Requirements:
 
 ANALYSIS_TEXT_FIELDS = ("tldr", "motivation", "method", "result", "help_to_user")
 IDEA_SPARK_FIELDS = ("idea", "risk", "inspiration")
+GENERIC_KEYWORD_STOPWORDS = {
+    "paper",
+    "papers",
+    "study",
+    "studies",
+    "method",
+    "methods",
+    "approach",
+    "approaches",
+    "framework",
+    "frameworks",
+    "model",
+    "models",
+    "task",
+    "tasks",
+    "application",
+    "applications",
+}
 
 
 def build_openai_client() -> OpenAI:
@@ -225,10 +253,14 @@ def _normalize_analysis_payload(data: dict, language: str, fallback_text: str = 
 
 def _normalize_analysis_result(data: dict | None, language: str, fallback_text: str = "") -> tuple[dict, list[str]]:
     payload = data if isinstance(data, dict) else {}
-    return (
-        _normalize_analysis_payload(payload, language, fallback_text=fallback_text),
-        _normalize_affiliation_list_payload(payload),
+    analysis = _normalize_analysis_payload(payload, language, fallback_text=fallback_text)
+    analysis["keywords_raw"] = _normalize_keyword_list(payload.get("keywords_raw", []), max_items=8, prefer_general=False)
+    analysis["keywords_normalized"] = _normalize_keyword_list(
+        payload.get("keywords_normalized", []),
+        max_items=6,
+        prefer_general=True,
     )
+    return analysis, _normalize_affiliation_list_payload(payload)
 
 
 def _dedupe_text_list(items: list[str]) -> list[str]:
@@ -244,6 +276,82 @@ def _dedupe_text_list(items: list[str]) -> list[str]:
         seen.add(key)
         ordered.append(text)
     return ordered
+
+
+def _normalize_keyword_label(value: str) -> str:
+    text = str(value or "").strip().lower()
+    text = re.sub(r"[“”\"'`]+", "", text)
+    text = text.replace("&", " and ")
+    text = re.sub(r"[^a-z0-9+\-/ ]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip(" ,;|/:-")
+    return text
+
+
+def _should_skip_keyword(label: str) -> bool:
+    if not label or len(label) < 3 or len(label) > 48:
+        return True
+    if label in GENERIC_KEYWORD_STOPWORDS:
+        return True
+    if re.fullmatch(r"\d+(?:\.\d+)?", label):
+        return True
+    return False
+
+
+def _contains_keyword_phrase(longer: str, shorter: str) -> bool:
+    if not longer or not shorter:
+        return False
+    if longer == shorter:
+        return True
+    return re.search(rf"(?<![a-z0-9]){re.escape(shorter)}(?![a-z0-9])", longer) is not None
+
+
+def _normalize_keyword_list(values: object, *, max_items: int, prefer_general: bool) -> list[str]:
+    if isinstance(values, str):
+        candidates = [values]
+    elif isinstance(values, list):
+        candidates = [str(item or "") for item in values]
+    else:
+        return []
+
+    selected: list[str] = []
+    for raw in candidates:
+        label = _normalize_keyword_label(raw)
+        if _should_skip_keyword(label):
+            continue
+
+        should_skip = False
+        for index, existing in enumerate(list(selected)):
+            overlaps = _contains_keyword_phrase(existing, label) or _contains_keyword_phrase(label, existing)
+            if not overlaps:
+                continue
+
+            if prefer_general:
+                existing_parts = existing.split()
+                label_tokens = len(label.split())
+                generic_expansion = label_tokens == 1 and len(existing_parts) == 2 and any(
+                    token in GENERIC_KEYWORD_STOPWORDS for token in existing_parts
+                )
+                label_is_reasonably_general = label_tokens >= 2 or generic_expansion
+                if label_is_reasonably_general and label_tokens <= len(existing_parts) and len(label) <= len(existing):
+                    selected[index] = label
+                should_skip = True
+                break
+
+            existing_tokens = len(existing.split())
+            label_tokens = len(label.split())
+            if label_tokens >= existing_tokens and len(label) >= len(existing):
+                selected[index] = label
+            should_skip = True
+            break
+
+        if should_skip:
+            continue
+
+        selected.append(label)
+        if len(selected) >= max_items:
+            break
+
+    return _dedupe_text_list(selected)[:max_items]
 
 
 def _affiliation_text_looks_noisy(text: str) -> bool:
@@ -355,7 +463,7 @@ def analyze_paper(client: OpenAI, paper: Paper, model: str, language: str, tempe
         f"Domain: {paper.domain}\n"
         f"Current extracted affiliations: {json.dumps(paper.affiliations or [], ensure_ascii=False)}\n"
         f"Raw affiliation candidates: {json.dumps((paper.affiliation_evidence or [])[:8], ensure_ascii=False)}\n"
-        "Return strict JSON only with top-level keys affiliations, zh, en."
+        "Return strict JSON only with top-level keys affiliations, keywords_raw, keywords_normalized, zh, en."
     )
     response = client.chat.completions.create(
         model=model,
