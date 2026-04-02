@@ -2,6 +2,11 @@
 
 一个静态 Web 项目：每日抓取 arXiv，按领域桶（含 Biology 优先）筛选最相关 Top-30，调用可配置 AI（DeepSeek/OpenAI-compatible）分析，并仅保留最近 7 天数据供页面切换查看。
 
+补充文档：
+
+- 安全策略：[`.github/SECURITY.md`](.github/SECURITY.md)
+- 首次公开发布检查清单：[`docs/GitHub_Public_Release_Checklist.md`](docs/GitHub_Public_Release_Checklist.md)
+
 当前推荐的使用形态为 **混合模式**：
 
 - **自动日报层**：GitHub Actions 每天自动抓取、排序并生成基础 AI 日报
@@ -113,11 +118,12 @@ export EMBEDDING_BATCH_SIZE='10'
 ## 定时自动化
 
 已提供 `.github/workflows/daily.yml`：
-- 每日 UTC 07:00 自动运行
+- 每日 **06:00 Asia/Shanghai** 自动运行
 - 支持手动触发
-- 在 Actions 中生成最新 `data/` 与静态网页产物
-- 将成品站点强制发布到 `gh-pages` 分支
-- `main` 只保留源码，不再每天自动提交数据
+- 在 Actions 中先生成临时目录 `build/generated-data/`
+- 再打包为静态站点目录 `build/site/`，其中包含 `build/site/data/`
+- 最后将整个成品站点 **强制发布到 `gh-pages` 分支**
+- `main` 只保留源码，不再每天自动提交生成数据
 
 ## GitHub Pages 部署说明
 
@@ -129,10 +135,32 @@ export EMBEDDING_BATCH_SIZE='10'
 这意味着：
 
 - `main` 不会因为每天产出的 JSON/网页而持续膨胀
+- 自动生成的网页与 `data/` 都会进入 `gh-pages`
 - GitHub Pages 直接从 `gh-pages` 提供静态站点
+
+工作流中的数据流转为：
+
+1. `scripts/run_pipeline.py --data-dir build/generated-data`
+2. `scripts/build_site.py --source-data build/generated-data --output-dir build/site`
+3. 将 `build/site/` 整体推送到 `gh-pages`
+
+也就是说，**GitHub Actions 每天生成的数据不会回写到 `main`**。
 
 你需要在 GitHub 仓库设置中确认：
 
 - **Pages Source = Deploy from a branch**
 - **Branch = `gh-pages`**
 - **Folder = `/ (root)`**
+
+推荐同时配置这些 Repository Secrets：
+
+- `OPENAI_API_KEY`
+- `OPENAI_BASE_URL`
+- `EMBEDDING_API_KEY`
+- `EMBEDDING_BASE_URL`
+- `RERANK_API_KEY`（可选）
+- `RERANK_BASE_URL`（可选）
+- `DASHSCOPE_API_KEY`（可选）
+- `PAGES_DEPLOY_TOKEN`（可选但推荐；用于更稳妥地推送 `gh-pages`）
+
+其中 `PAGES_DEPLOY_TOKEN` 建议使用一个仅用于当前仓库的 Personal Access Token（至少具备仓库写入能力）。如果不配置，workflow 会回退到默认的 `GITHUB_TOKEN`。

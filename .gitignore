@@ -1,3 +1,4 @@
+# Public GitHub source branch should stay source-only.
 Materials/*
 # !Materials/Plan/
 # !Materials/Plan/**
@@ -6,9 +7,24 @@ Materials/*
 Materials/api/
 Materials/OriginalPlan/
 Materials/RefCode/
+
+# Local runtime configs / generated data
+config/config.yaml
+config/config.dev.yaml
+data/
+
+# Local editor / environment files
+.vscode/
 .env
 .env.*
 build/
 __pycache__/
 **/__pycache__/
+.pytest_cache/
+.mypy_cache/
+.venv/
+.idea/
+.DS_Store
 .codex
+
+docs/

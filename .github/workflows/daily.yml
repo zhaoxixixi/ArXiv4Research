@@ -2,8 +2,14 @@ name: arxiv-research-daily
 
 on:
   schedule:
-    - cron: "0 7 * * *"
+    # Every day at 06:00 in Asia/Shanghai.
+    - cron: "0 6 * * *"
+      timezone: "Asia/Shanghai"
   workflow_dispatch:
+
+concurrency:
+  group: arxiv-research-daily
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -11,6 +17,10 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      OUTPUT_DATA_DIR: build/generated-data
+      SITE_OUTPUT_DIR: build/site
+      PUBLISH_BRANCH: gh-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,25 +44,32 @@ jobs:
           OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
           EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY }}
           EMBEDDING_BASE_URL: ${{ secrets.EMBEDDING_BASE_URL }}
-        run: python scripts/run_pipeline.py --data-dir build/generated-data
+          RERANK_API_KEY: ${{ secrets.RERANK_API_KEY }}
+          RERANK_BASE_URL: ${{ secrets.RERANK_BASE_URL }}
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+        run: python scripts/run_pipeline.py --data-dir "$OUTPUT_DATA_DIR"
 
       - name: Build deployable site bundle
-        run: python scripts/build_site.py --source-data build/generated-data --output-dir build/site
+        run: python scripts/build_site.py --source-data "$OUTPUT_DATA_DIR" --output-dir "$SITE_OUTPUT_DIR"
 
-      - name: Publish to gh-pages orphan branch
+      - name: Publish generated site and data to gh-pages output branch
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN || github.token }}
           REPO: ${{ github.repository }}
         run: |
           rm -rf /tmp/arxiv4research-pages
           mkdir -p /tmp/arxiv4research-pages
-          cp -R build/site/. /tmp/arxiv4research-pages/
+          cp -R "$SITE_OUTPUT_DIR"/. /tmp/arxiv4research-pages/
           cd /tmp/arxiv4research-pages
           git init
-          git checkout --orphan gh-pages
+          git checkout --orphan "$PUBLISH_BRANCH"
           git config user.name "${{ vars.NAME || 'github-actions[bot]' }}"
           git config user.email "${{ vars.EMAIL || 'github-actions[bot]@users.noreply.github.com' }}"
           git add --all
+          if git diff --cached --quiet; then
+            echo "No site changes to publish."
+            exit 0
+          fi
           git commit -m "chore(pages): update daily arxiv site"
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
-          git push --force origin gh-pages
+          git push --force origin "$PUBLISH_BRANCH"
