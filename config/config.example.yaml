@@ -1,7 +1,7 @@
 project:
   title: ArXiv Research Assistant
-  top_k: 30
-  keep_days: 7
+  top_k: 100
+  keep_days: 30
   language: Chinese
 
 retrieval:
@@ -38,11 +38,12 @@ retrieval:
       priority: 90
       filter_mode: hard
       categories:
-        - cs.AI
         - cs.LG
         - cs.CE
         - cs.NE
         - cs.SY
+        - cs.GR
+        - cs.GT
         - eess.SP
         - physics.comp-ph
         - math.NA
@@ -73,6 +74,7 @@ retrieval:
         - cs.CL
         - cs.AI
         - cs.IR
+        - cs.IT
       keywords:
         - language model
         - reasoning
@@ -114,7 +116,7 @@ relevance:
 rerank:
   mode: embedding_plus_qwen3_rerank
   model: qwen3-rerank
-  pool_size: 60
+  pool_size: 500
   instruct: >
     Given a research profile, rank candidate arXiv papers by practical relevance,
     transferability, and idea-generation potential.
