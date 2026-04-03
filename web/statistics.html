@@ -132,6 +132,94 @@
       </form>
     </dialog>
 
+
+
+    <div id="paper-modal" class="paper-modal" aria-hidden="true">
+      <div class="paper-modal-content">
+        <div class="paper-modal-header">
+          <div>
+            <div id="paper-modal-meta" class="paper-modal-meta">论文详情</div>
+            <h2 id="paper-modal-title">Paper Details</h2>
+          </div>
+          <button id="close-paper-modal" class="btn ghost modal-close-btn" aria-label="关闭详情">关闭</button>
+        </div>
+        <div id="paper-modal-body" class="paper-modal-body"></div>
+        <div class="paper-modal-footer">
+          <div class="paper-navigation">
+            <button id="paper-prev" type="button" class="btn ghost">上一篇</button>
+            <span id="paper-position" class="paper-position">-</span>
+            <button id="paper-next" type="button" class="btn ghost">下一篇</button>
+          </div>
+          <div class="paper-modal-buttons">
+            <a id="paper-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">arXiv</a>
+            <a id="pdf-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">PDF</a>
+            <a id="html-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">HTML</a>
+            <a id="code-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" style="display:none;">Code</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <dialog id="settings-dialog" class="dialog">
+      <form method="dialog" class="panel dialog-panel settings-panel">
+        <div class="dialog-header-block">
+          <div class="dialog-kicker">Local Enhancement</div>
+          <h3>本地增强设置</h3>
+          <p class="dialog-lead">
+            自动日报由 GitHub 每天生成；这里的设置只用于“生成我的 Spark / 继续提问”等本地增强能力，不会写入仓库，也不会出现在公开网页源码中。
+          </p>
+        </div>
+
+        <section class="dialog-card dialog-note">
+          <div class="dialog-note-icon">🔐</div>
+          <div>
+            <strong>仅保存在你的浏览器中</strong>
+            <p class="hint">适合把 Spark / follow-up 做成“个人增强层”，而不是公开站点的一部分。</p>
+          </div>
+        </section>
+
+        <div class="dialog-form-grid">
+          <label class="field-group field-span-2">
+            <span>Base URL（OpenAI-compatible）</span>
+            <input id="api-base-url" placeholder="https://api.deepseek.com/v1" />
+          </label>
+
+          <label class="field-group field-span-2">
+            <span>API Key</span>
+            <input id="api-key" type="password" placeholder="sk-..." />
+          </label>
+
+          <label class="field-group">
+            <span>Model</span>
+            <input id="api-model" placeholder="deepseek-chat" />
+          </label>
+
+          <label class="field-group">
+            <span>本地保存方式</span>
+            <select id="storage-mode">
+              <option value="local">记住此设备（localStorage，推荐自用）</option>
+              <option value="session">仅本次会话（sessionStorage，更安全）</option>
+            </select>
+          </label>
+
+          <label class="field-group field-span-2">
+            <span>你的当前研究背景（用于 personalized spark / follow-up）</span>
+            <textarea
+              id="research-context"
+              placeholder="例如：我目前关注 Biology × Computer Science，尤其是 single-cell、trajectory prediction、SSA/CME、surrogate modeling、flow matching。希望得到尽量具体、可实验的建议。"
+            ></textarea>
+          </label>
+        </div>
+
+        <menu class="dialog-actions">
+          <button value="cancel" class="btn ghost dialog-secondary-btn">关闭</button>
+          <button id="save-settings" value="default" class="btn dialog-primary-btn">保存设置</button>
+          <button id="clear-settings" type="button" class="btn ghost danger dialog-danger-btn">清空本地设置</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="./scripts/paper_detail_shared.js"></script>
     <script src="./scripts/statistics.js"></script>
   </body>
 </html>

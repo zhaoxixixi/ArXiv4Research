@@ -1,3 +1,6 @@
+const SharedDetailApi = window.PaperDetailShared;
+const SharedDetailUtils = SharedDetailApi.utils;
+
 async function fetchJson(path) {
   const res = await fetch(path);
   if (!res.ok) throw new Error(`Failed to fetch ${path}`);
@@ -33,52 +36,8 @@ function formatAuthors(authors = [], maxCount = 4) {
   return `${authors.slice(0, maxCount).join(", ")} 等`;
 }
 
-function derivePdfUrl(link) {
-  if (!link) return "#";
-  const replaced = link.replace("/abs/", "/pdf/");
-  return replaced.endsWith(".pdf") ? replaced : `${replaced}.pdf`;
-}
-
-function isPointInsideRect(x, y, rect) {
-  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-}
-
-function resolveDialogPanel(dialog) {
-  return dialog?.querySelector(".dialog-panel") || dialog?.querySelector(".panel") || dialog?.firstElementChild || null;
-}
-
-function enableDialogOutsideClose(dialog) {
-  if (!dialog) return;
-
-  let pointerStartedOutside = false;
-
-  dialog.addEventListener("pointerdown", (event) => {
-    if (!dialog.open) return;
-    const panel = resolveDialogPanel(dialog);
-    if (!panel) return;
-    pointerStartedOutside = !isPointInsideRect(event.clientX, event.clientY, panel.getBoundingClientRect());
-  });
-
-  dialog.addEventListener("click", (event) => {
-    if (!dialog.open) return;
-    const panel = resolveDialogPanel(dialog);
-    if (!panel) return;
-
-    if (panel.contains(event.target)) {
-      pointerStartedOutside = false;
-      return;
-    }
-
-    const clickedOutside = !isPointInsideRect(event.clientX, event.clientY, panel.getBoundingClientRect());
-    if (pointerStartedOutside && clickedOutside) {
-      dialog.close();
-    }
-    pointerStartedOutside = false;
-  });
-
-  dialog.addEventListener("close", () => {
-    pointerStartedOutside = false;
-  });
+function normalizePaperId(id) {
+  return encodeURIComponent(id || "");
 }
 
 const THEME_STORAGE_KEY = "ara_theme";
@@ -125,7 +84,9 @@ let currentDateLabel = "";
 let currentDateRange = null;
 let currentPapers = [];
 let currentKeyword = "";
+let currentRelatedPapers = [];
 let dateDialog;
+let paperDetailController;
 
 function getTheme() {
   return localStorage.getItem(THEME_STORAGE_KEY) || DEFAULT_THEME;
@@ -381,6 +342,13 @@ function extractKeywordRanking(papers, limit = 18) {
   return results;
 }
 
+function buildScopeCacheKey() {
+  if (currentDateMode === "range" && currentDateRange) {
+    return `${currentDateRange.start}_to_${currentDateRange.end}`;
+  }
+  return currentDateRange?.end || availableDates[0] || "";
+}
+
 function renderSummary(scopeDates) {
   const summary = document.getElementById("statistics-summary");
   if (!summary) return;
@@ -391,8 +359,27 @@ function renderSummary(scopeDates) {
     <span class="meta-pill">${escapeHtml(String(currentPapers.length || 0))} 篇当前结果</span>
     <span class="meta-pill">${escapeHtml(String(domainCount || 0))} 个领域</span>
     <span class="meta-pill">${currentDateMode === "range" ? `${scopeDates.length} 天聚合统计` : "单日统计"}</span>
-    <span class="meta-pill">点击关键词查看相关论文</span>
+    <span class="meta-pill">点击论文卡片直接查看详情</span>
   `;
+}
+
+function bindRelatedPaperEvents() {
+  document.querySelectorAll(".related-paper-card[data-paper-id]").forEach((card) => {
+    const openDetail = () => {
+      paperDetailController?.openById(decodeURIComponent(card.dataset.paperId || ""));
+    };
+
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("a, button")) return;
+      openDetail();
+    });
+
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      openDetail();
+    });
+  });
 }
 
 function renderRelatedPapers(keyword) {
@@ -409,18 +396,22 @@ function renderRelatedPapers(keyword) {
     return `${paper.title || ""} ${paper.summary || ""}`.toLowerCase().includes(normalizedKeyword);
   });
 
+  currentRelatedPapers = matched.slice(0, 24);
   relatedTitle.textContent = `Related Papers · ${keyword}`;
 
-  if (!matched.length) {
+  if (paperDetailController?.isOpen()) {
+    paperDetailController.close();
+  }
+
+  if (!currentRelatedPapers.length) {
     container.innerHTML = `<div class="stats-empty">当前范围内没有命中该关键词的论文。</div>`;
     return;
   }
 
-  container.innerHTML = matched
-    .slice(0, 24)
+  container.innerHTML = currentRelatedPapers
     .map(
       (paper) => `
-        <article class="related-paper-card">
+        <article class="related-paper-card" data-paper-id="${normalizePaperId(paper.id)}" tabindex="0" role="button" aria-label="打开 ${escapeHtml(paper.title || "论文详情")}">
           <div class="related-paper-top">
             <span class="tag">${escapeHtml(paper.domain || "general")}</span>
             <span class="tag">${escapeHtml(paper.source_date || (paper.report_dates || [])[0] || "-")}</span>
@@ -432,13 +423,15 @@ function renderRelatedPapers(keyword) {
             <span class="mini-hint">相关度 ${escapeHtml(String(paper.relevance_score ?? ""))}</span>
             <div class="paper-modal-buttons">
               <a class="btn ghost resource-btn" href="${escapeHtml(paper.link || "#")}" target="_blank" rel="noreferrer">arXiv</a>
-              <a class="btn ghost resource-btn" href="${escapeHtml(derivePdfUrl(paper.link))}" target="_blank" rel="noreferrer">PDF</a>
+              <a class="btn ghost resource-btn" href="${escapeHtml(SharedDetailUtils.derivePdfUrl(paper.link))}" target="_blank" rel="noreferrer">PDF</a>
             </div>
           </div>
         </article>
       `,
     )
     .join("");
+
+  bindRelatedPaperEvents();
 
   document.querySelectorAll(".keyword-item").forEach((button) => {
     button.classList.toggle("active", button.dataset.keyword === keyword);
@@ -451,6 +444,9 @@ function renderKeywords() {
   if (!container) return;
 
   if (!keywords.length) {
+    currentKeyword = "";
+    currentRelatedPapers = [];
+    if (paperDetailController?.isOpen()) paperDetailController.close();
     container.innerHTML = `<div class="stats-empty">当前结果较少，暂时无法生成稳定的热门关键词。</div>`;
     document.getElementById("related-papers").innerHTML = "";
     document.getElementById("related-title").textContent = "Related Papers";
@@ -496,6 +492,7 @@ async function loadScope(scope) {
 
   updateDateTrigger(scope.mode === "single" ? scope : { mode: "range", start: currentDateRange.start, end: currentDateRange.end });
   currentKeyword = "";
+  currentRelatedPapers = [];
   renderSummary(scopeDates);
   renderKeywords();
 }
@@ -505,7 +502,13 @@ async function main() {
   const index = await resolveDataBasePath();
   availableDates = [...(index.dates || [])];
   dateDialog = document.getElementById("date-dialog");
-  enableDialogOutsideClose(dateDialog);
+  SharedDetailUtils.enableDialogOutsideClose(dateDialog);
+
+  paperDetailController = SharedDetailApi.createController({
+    getPapers: () => currentRelatedPapers,
+    getScopeLabel: () => (currentKeyword ? `${currentDateLabel} · ${currentKeyword}` : currentDateLabel),
+    getScopeCacheKey: () => buildScopeCacheKey(),
+  }).init();
 
   const initial = index.latest || availableDates[0];
   if (!initial) {

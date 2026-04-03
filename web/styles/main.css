@@ -494,6 +494,41 @@ button {
   color: var(--color-text);
 }
 
+.local-status-mobile {
+  display: none;
+}
+
+.local-status-mobile-summary {
+  list-style: none;
+}
+
+.local-status-mobile-summary::-webkit-details-marker {
+  display: none;
+}
+
+.local-status-mobile-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.local-status-mobile-body {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.local-status-mobile-row {
+  display: grid;
+  gap: 4px;
+}
+
+.local-status-mobile-row span {
+  color: var(--color-text-soft);
+}
+
 .local-status .ok {
   color: var(--color-ok);
 }
@@ -1410,6 +1445,57 @@ textarea {
     gap: 6px;
   }
 
+  .filter-board {
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+
+  .filter-row {
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .filter-label {
+    display: none;
+  }
+
+  .filter-chip-scroll,
+  .meta-inline {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    width: 100%;
+    padding-bottom: 2px;
+  }
+
+  .filter-chip-scroll::-webkit-scrollbar,
+  .meta-inline::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-chip,
+  .meta-pill {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .filter-chip {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .filter-chip-label {
+    font-size: 12px;
+  }
+
+  .meta-pill {
+    padding: 7px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
   .header-date-text {
     font-size: 15px;
   }
@@ -1427,6 +1513,53 @@ textarea {
 
   .dialog-actions {
     justify-content: stretch;
+  }
+
+  .local-status {
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border-radius: 14px;
+  }
+
+  .local-status-desktop {
+    display: none;
+  }
+
+  .local-status-mobile {
+    display: block;
+  }
+
+  .local-status-mobile[open] .local-status-mobile-summary {
+    margin-bottom: 2px;
+  }
+
+  .local-status-mobile-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .local-status-mobile-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .local-status-mobile-hint {
+    font-size: 12px;
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+
+  .local-status-mobile-body .local-status-mobile-row strong {
+    font-size: 12px;
+  }
+
+  .local-status-mobile-body .local-status-mobile-row span {
+    font-size: 12px;
+    line-height: 1.6;
   }
 
   .dialog-danger-btn {
