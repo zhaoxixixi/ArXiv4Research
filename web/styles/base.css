@@ -153,7 +153,8 @@ body, select, input, textarea, button, .panel, .paper-card, .paper-modal-content
 .project-pill-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--color-tag-text); box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05); }
 .project-pill-text { font-weight: 600; letter-spacing: 0.01em; }
 .brand-lockup { display: inline-flex; align-items: center; gap: 14px; justify-self: center; }
-.brand-mark { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: var(--color-tag-bg); border: 1px solid var(--color-border); color: var(--color-tag-text); font-weight: 700; letter-spacing: 0.04em; }
+.brand-mark { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; padding: 4px; background: color-mix(in srgb, var(--color-panel) 82%, white 18%); border: 1px solid var(--color-border); box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08); overflow: hidden; }
+.brand-mark-logo { width: 100%; height: 100%; display: block; object-fit: contain; border-radius: 12px; }
 .brand-copy h1 { margin: 0; font-size: 18px; font-weight: 700; color: var(--color-text); }
 .sub { margin: 6px 0 0; color: var(--color-text-faint); font-size: 13px; }
 .header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
