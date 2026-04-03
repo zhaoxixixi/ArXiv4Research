@@ -64,6 +64,89 @@
     return preferred.length ? preferred.slice(0, maxCount).join("; ") : "";
   };
 
+  /** Render a safe lightweight Markdown subset for local UI answers. */
+  const renderMarkdown = (value) => {
+    const source = String(value || "").replace(/\r\n?/g, "\n").trim();
+    if (!source) return "";
+
+    const fencedBlocks = [];
+    const placeholderPattern = /@@MD_BLOCK_(\d+)@@/;
+    const withPlaceholders = source.replace(/```([\w-]+)?\n?([\s\S]*?)```/g, (_match, language = "", code = "") => {
+      const index = fencedBlocks.push({ language: String(language || "").trim(), code: String(code || "") }) - 1;
+      return `@@MD_BLOCK_${index}@@`;
+    });
+
+    const escapedSource = escapeHtml(withPlaceholders);
+
+    const renderInlineMarkdown = (text) => {
+      const inlineCodes = [];
+      const withInlineCodePlaceholders = text.replace(/`([^`]+)`/g, (_match, code) => {
+        const index = inlineCodes.push(code) - 1;
+        return `@@INLINE_CODE_${index}@@`;
+      });
+
+      let rendered = withInlineCodePlaceholders
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>')
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/__([^_]+)__/g, "<strong>$1</strong>")
+        .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,!?:;]|$)/g, "$1<em>$2</em>")
+        .replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,!?:;]|$)/g, "$1<em>$2</em>");
+
+      rendered = rendered.replace(/@@INLINE_CODE_(\d+)@@/g, (_match, index) => `<code>${inlineCodes[Number(index)] || ""}</code>`);
+      return rendered;
+    };
+
+    const renderBlock = (block) => {
+      const trimmed = block.trim();
+      if (!trimmed) return "";
+
+      const placeholderMatch = trimmed.match(placeholderPattern);
+      if (placeholderMatch && placeholderMatch[0] === trimmed) {
+        const fenced = fencedBlocks[Number(placeholderMatch[1])] || { language: "", code: "" };
+        const languageClass = fenced.language ? ` class="language-${escapeHtml(fenced.language)}"` : "";
+        return `<pre><code${languageClass}>${escapeHtml(fenced.code).replace(/\n$/, "")}</code></pre>`;
+      }
+
+      const lines = trimmed.split("\n");
+      const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
+      if (headingMatch) {
+        const level = Math.min(headingMatch[1].length, 6);
+        return `<h${level}>${renderInlineMarkdown(headingMatch[2].trim())}</h${level}>`;
+      }
+
+      if (lines.every((line) => /^\s*[-*+]\s+/.test(line))) {
+        const items = lines
+          .map((line) => line.replace(/^\s*[-*+]\s+/, "").trim())
+          .filter(Boolean)
+          .map((item) => `<li>${renderInlineMarkdown(item)}</li>`)
+          .join("");
+        return `<ul>${items}</ul>`;
+      }
+
+      if (lines.every((line) => /^\s*\d+\.\s+/.test(line))) {
+        const items = lines
+          .map((line) => line.replace(/^\s*\d+\.\s+/, "").trim())
+          .filter(Boolean)
+          .map((item) => `<li>${renderInlineMarkdown(item)}</li>`)
+          .join("");
+        return `<ol>${items}</ol>`;
+      }
+
+      if (lines.every((line) => /^\s*>\s?/.test(line))) {
+        const content = lines.map((line) => line.replace(/^\s*>\s?/, "").trim()).join("<br />");
+        return `<blockquote>${renderInlineMarkdown(content)}</blockquote>`;
+      }
+
+      return `<p>${renderInlineMarkdown(lines.map((line) => line.trim()).join("<br />"))}</p>`;
+    };
+
+    return escapedSource
+      .split(/\n{2,}/)
+      .map((block) => renderBlock(block))
+      .filter(Boolean)
+      .join("");
+  };
+
   const isPointInsideRect = (x, y, rect) => x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
   const resolveDialogPanel = (dialog) =>
     dialog?.querySelector(".dialog-panel") || dialog?.querySelector(".panel") || dialog?.firstElementChild || null;
@@ -110,6 +193,7 @@
     deriveHtmlUrl,
     findPrimaryCodeLink,
     getDisplayKeywords,
+    renderMarkdown,
     enableDialogOutsideClose,
   };
 })();

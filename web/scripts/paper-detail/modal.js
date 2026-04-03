@@ -1,7 +1,7 @@
 (() => {
   const ARA = (window.ARA = window.ARA || {});
   const paperDetail = (ARA.paperDetail = ARA.paperDetail || {});
-  const { enableDialogOutsideClose } = ARA.shared.utils;
+  const { enableDialogOutsideClose, renderMarkdown } = ARA.shared.utils;
 
   const createController = (options = {}) => {
     const getPapers = typeof options.getPapers === "function" ? options.getPapers : () => [];
@@ -40,6 +40,11 @@
     };
     const loadSettings = () => paperDetail.settings.loadSettingsIntoDialog(settingsDialog);
     const showSettings = () => settingsDialog && (loadSettings(), !settingsDialog.open && settingsDialog.showModal());
+    const renderAnswerMarkdown = (node, text) => {
+      if (!node) return;
+      node.innerHTML = renderMarkdown(text);
+      node.style.display = "block";
+    };
     const bindModalContentEvents = (paper) => {
       const modalBody = paperModal?.querySelector("#paper-modal-body");
       if (!modalBody) return;
@@ -90,9 +95,9 @@
         button.disabled = true;
         button.textContent = "Thinking...";
         try {
-          if (answer) answer.textContent = await paperDetail.actions.askFollowup({ paper, question, getScopeCacheKey, showSettings }), (answer.style.display = "block");
+          renderAnswerMarkdown(answer, await paperDetail.actions.askFollowup({ paper, question, getScopeCacheKey, showSettings }));
         } catch (error) {
-          if (answer) answer.textContent = `Error: ${error.message}`, (answer.style.display = "block");
+          renderAnswerMarkdown(answer, `**Error:** ${error.message}`);
         } finally {
           button.disabled = false;
           button.textContent = "Ask";

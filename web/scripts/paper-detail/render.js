@@ -101,7 +101,7 @@
             <div class="template-list">${PRESET_QUESTIONS.map((item) => `<button type="button" class="template-btn modal-preset-btn" data-question="${encodeURIComponent(item.text)}">${escapeHtml(item.label)}</button>`).join("")}</div>
             <textarea class="modal-followup-input" placeholder="Ask a follow-up question..."></textarea>
             <div class="button-row"><button type="button" class="btn modal-ask-btn">Ask</button></div>
-            <div class="answer modal-followup-answer" style="display:none;"></div>
+            <div class="answer markdown-answer modal-followup-answer" style="display:none;"></div>
           </section>
           <section class="detail-section pdf-preview-section">
             <div class="pdf-header"><h3>PDF Viewer</h3><button type="button" class="pdf-expand-btn" title="Expand PDF">Expand</button></div>

@@ -9,6 +9,79 @@
   line-height: 1.75;
 }
 
+.markdown-answer {
+  white-space: normal;
+}
+
+.markdown-answer > :first-child { margin-top: 0; }
+.markdown-answer > :last-child { margin-bottom: 0; }
+.markdown-answer p,
+.markdown-answer ul,
+.markdown-answer ol,
+.markdown-answer blockquote,
+.markdown-answer pre,
+.markdown-answer h1,
+.markdown-answer h2,
+.markdown-answer h3,
+.markdown-answer h4 {
+  margin: 0 0 12px;
+}
+
+.markdown-answer ul,
+.markdown-answer ol {
+  padding-left: 22px;
+}
+
+.markdown-answer li + li {
+  margin-top: 6px;
+}
+
+.markdown-answer h1,
+.markdown-answer h2,
+.markdown-answer h3,
+.markdown-answer h4 {
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.markdown-answer blockquote {
+  padding-left: 14px;
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-text-soft);
+}
+
+.markdown-answer code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-panel) 78%, var(--color-accent-soft) 22%);
+  color: var(--color-text);
+  font-family: "SFMono-Regular", "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.92em;
+}
+
+.markdown-answer pre {
+  overflow-x: auto;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-panel) 68%, black 6%);
+  border: 1px solid var(--color-border);
+}
+
+.markdown-answer pre code {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+}
+
+.markdown-answer a {
+  color: var(--color-accent-strong);
+  text-decoration: none;
+}
+
+.markdown-answer a:hover {
+  text-decoration: underline;
+}
+
 .local-answer { background: var(--summary-box-bg); border: 1px solid var(--summary-box-border); color: var(--color-text); font-weight: 500; }
 .detail-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--color-border); }
 .detail-section:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
