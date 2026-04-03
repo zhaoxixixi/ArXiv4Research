@@ -7,6 +7,9 @@ on:
       timezone: "Asia/Shanghai"
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: arxiv-research-daily
   cancel-in-progress: false
@@ -24,12 +27,32 @@ jobs:
       TZ: Asia/Shanghai
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
+      - name: Checkout current gh-pages branch for retained data
+        id: checkout_pages
+        continue-on-error: true
+        uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          path: build/gh-pages
+          fetch-depth: 1
+
+      - name: Restore retained data into incremental workspace
+        run: |
+          rm -rf "$OUTPUT_DATA_DIR"
+          mkdir -p "$OUTPUT_DATA_DIR"
+          if [ -d build/gh-pages/data ]; then
+            cp -R build/gh-pages/data/. "$OUTPUT_DATA_DIR"/
+            echo "Restored existing daily data from gh-pages."
+          else
+            echo "No existing gh-pages data found; starting fresh."
+          fi
+
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
