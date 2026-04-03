@@ -37,6 +37,7 @@ class Config:
     title: str
     top_k: int
     keep_days: int
+    timezone: str
     language: str
     max_feed_items_per_category: int
     domains: list[DomainBucket]

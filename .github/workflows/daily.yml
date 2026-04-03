@@ -21,6 +21,7 @@ jobs:
       OUTPUT_DATA_DIR: build/generated-data
       SITE_OUTPUT_DIR: build/site
       PUBLISH_BRANCH: gh-pages
+      TZ: Asia/Shanghai
     steps:
       - name: Checkout
         uses: actions/checkout@v4

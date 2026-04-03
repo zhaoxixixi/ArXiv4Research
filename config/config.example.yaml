@@ -2,6 +2,7 @@ project:
   title: ArXiv Research Assistant
   top_k: 100
   keep_days: 30
+  timezone: Asia/Shanghai
   language: Chinese
 
 retrieval:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from .models import Paper, iso_date
@@ -24,13 +24,26 @@ def _paper_to_dict(paper: Paper) -> dict:
     }
 
 
-def write_daily_snapshot(base_dir: str | Path, papers: list[Paper], today: datetime) -> Path:
+def _iso_timestamp(dt: datetime) -> str:
+    text = dt.isoformat(timespec="seconds")
+    return text.replace("+00:00", "Z")
+
+
+def write_daily_snapshot(
+    base_dir: str | Path,
+    papers: list[Paper],
+    generated_at_local: datetime,
+    report_timezone: str,
+) -> Path:
     base = Path(base_dir)
     daily_dir = base / "daily"
     daily_dir.mkdir(parents=True, exist_ok=True)
-    file_path = daily_dir / f"{iso_date(today)}.json"
+    file_path = daily_dir / f"{iso_date(generated_at_local)}.json"
     payload = {
-        "date": iso_date(today),
+        "date": iso_date(generated_at_local),
+        "generated_at_local": _iso_timestamp(generated_at_local),
+        "generated_at_utc": _iso_timestamp(generated_at_local.astimezone(timezone.utc)),
+        "timezone": report_timezone,
         "count": len(papers),
         "papers": [_paper_to_dict(p) for p in papers],
     }

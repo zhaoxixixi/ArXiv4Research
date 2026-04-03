@@ -43,6 +43,7 @@ def load_config(config_path: str | Path) -> Config:
         title=project["title"],
         top_k=int(project.get("top_k", 30)),
         keep_days=int(project.get("keep_days", 7)),
+        timezone=project.get("timezone", "Asia/Shanghai"),
         language=project.get("language", "Chinese"),
         max_feed_items_per_category=int(retrieval.get("max_feed_items_per_category", 120)),
         domains=domains,

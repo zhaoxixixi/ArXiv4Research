@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .ai_client import analyze_paper, build_embedding_client, build_openai_client, maybe_refine_affiliations_with_llm
 from .arxiv_client import enrich_affiliations, fetch_latest_by_categories
@@ -10,10 +11,18 @@ from .sniffer import sniff_code_links
 from .storage import prune_daily_files, write_daily_snapshot, write_index, write_search_index
 
 
+def _resolve_report_timezone(timezone_name: str) -> ZoneInfo:
+    try:
+        return ZoneInfo(timezone_name)
+    except ZoneInfoNotFoundError as exc:
+        raise ValueError(f"Invalid project.timezone: {timezone_name}") from exc
+
+
 def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data") -> None:
     cfg = load_config(config_path)
     chat_client = build_openai_client()
     embedding_client = build_embedding_client()
+    report_timezone = _resolve_report_timezone(cfg.timezone)
     categories = sorted({c for d in cfg.domains for c in d.categories})
 
     papers = fetch_latest_by_categories(
@@ -60,8 +69,13 @@ def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data"
                 enabled=cfg.affiliation_llm_fallback_enabled,
             )
 
-    today = datetime.now(timezone.utc)
-    write_daily_snapshot(base_dir=data_dir, papers=top, today=today)
+    generated_at_local = datetime.now(report_timezone)
+    write_daily_snapshot(
+        base_dir=data_dir,
+        papers=top,
+        generated_at_local=generated_at_local,
+        report_timezone=cfg.timezone,
+    )
     dates = prune_daily_files(base_dir=data_dir, keep_days=cfg.keep_days)
     write_index(base_dir=data_dir, dates=dates, title=cfg.title)
     write_search_index(base_dir=data_dir, dates=dates)
