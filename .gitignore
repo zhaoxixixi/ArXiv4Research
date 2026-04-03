@@ -16,14 +16,24 @@ data/
 .vscode/
 .env
 .env.*
+!.env.example
 build/
 __pycache__/
 **/__pycache__/
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
 .venv/
 .idea/
 .DS_Store
+Thumbs.db
 .codex
 
-docs/
+# Frontend / tooling
+node_modules/
+package-lock.json
+dist/
+coverage/
+
+# Optional local docs scratchpad
+docs/drafts/
