@@ -4,7 +4,7 @@
   "description": "Static frontend and daily pipeline tooling for ArXiv4Research.",
   "scripts": {
     "lint": "eslint web/scripts --ext .js",
-    "format": "prettier --write web README.md CONTRIBUTING.md docs .github/workflows/lint.yml .env.example package.json .eslintrc.json .prettierrc"
+    "format": "prettier --write web README.md CONTRIBUTING.md docs .env.example package.json .eslintrc.json .prettierrc"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
