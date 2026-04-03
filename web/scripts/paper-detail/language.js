@@ -6,16 +6,16 @@
 
   const AI_LANGUAGE_META = {
     zh: {
-      label: "中文",
-      hint: "当前日报已保存中文与英文内容，可一键切换查看。",
-      fallbackHint: "当前数据可能只有单语内容；切换后会自动回退到可用版本。",
-      sectionTitle: "内容语言",
+      label: "Chinese",
+      hint: "Switch between the saved Chinese and English analysis.",
+      fallbackHint: "Only one saved language may be available for this paper.",
+      sectionTitle: "Content Language",
     },
     en: {
       label: "English",
-      hint: "The report stores both Chinese and English analysis for quick switching.",
-      fallbackHint: "This item may only contain one language; the view will fall back automatically.",
-      sectionTitle: "Analysis Language",
+      hint: "Switch between the saved Chinese and English analysis.",
+      fallbackHint: "Only one saved language may be available for this paper.",
+      sectionTitle: "Content Language",
     },
   };
 

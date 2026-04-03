@@ -4,7 +4,7 @@
 
   shared.constants = {
     DOMAIN_META: {
-      all: { label: "全部" },
+      all: { label: "All" },
       biology: { label: "biology" },
       ai4science: { label: "ai4science" },
       "math-physics": { label: "math-physics" },
@@ -16,10 +16,10 @@
     THEME_STORAGE_KEY: "ara_theme",
     DEFAULT_THEME: "lavender",
     THEMES: {
-      lavender: { label: "天空蓝", description: "参考站点风格，轻盈、明亮、适合日常浏览。" },
-      pearl: { label: "浅紫科技", description: "更纯净的浅色背景，适合白天阅读。" },
-      sage: { label: "鼠尾草", description: "轻微绿灰调，更安静克制。" },
-      graphite: { label: "石墨夜色", description: "低刺激夜间模式。" },
+      lavender: { label: "Sky Blue", description: "Light, bright, and easy to scan." },
+      pearl: { label: "Soft Violet", description: "Clean light mode with a violet accent." },
+      sage: { label: "Sage", description: "Quiet green-gray tones for long reading." },
+      graphite: { label: "Graphite Night", description: "Low-stimulation dark mode." },
     },
     SETTINGS_KEYS: {
       baseUrl: "hybrid_api_base_url",
@@ -35,9 +35,9 @@
     DEFAULT_RESEARCH_CONTEXT:
       "Biology x Computer Science research focus, especially computational biology, single-cell, surrogate modeling, trajectory prediction, SSA/CME, stochastic simulation, and flow matching.",
     PRESET_QUESTIONS: [
-      { label: "适配 SSA/CME？", text: "这篇文章的方法能否适配 SSA/CME 场景？最需要修改哪些组件？" },
-      { label: "作为 baseline？", text: "如果把这篇论文作为我当前方向的 baseline，需要额外补哪些评测指标和实验设置？" },
-      { label: "实验下一步？", text: "如果我想把这篇论文转化成下周可以执行的小实验，你建议我先做哪三步？" },
+      { label: "Fit SSA/CME?", text: "Can this method be adapted to SSA/CME settings? Which components would need the biggest changes?" },
+      { label: "Use as baseline?", text: "If I use this paper as a baseline for my direction, which metrics and experiments should I add first?" },
+      { label: "Next experiment?", text: "If I want to turn this paper into a small experiment for next week, what three steps should I start with?" },
     ],
   };
 })();

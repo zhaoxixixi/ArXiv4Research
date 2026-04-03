@@ -6,7 +6,7 @@
   const ensureLocalAiReady = (showSettings = () => {}) => {
     if (paperDetail.settings.hasLocalAiConfig()) return paperDetail.settings.getLocalSettings();
     showSettings();
-    throw new Error("请先在“本地增强设置”中填写 API 配置");
+    throw new Error("Please add your API settings first.");
   };
 
   const generatePersonalSpark = async ({ paper, getScopeCacheKey, showSettings = () => {} }) => {
@@ -27,7 +27,7 @@
             risk: parsed.risk || "",
             next_step: parsed.next_step || "",
           }
-        : { raw_response: raw || "模型未返回内容" },
+        : { raw_response: raw || "No model output." },
     };
     paperDetail.cache.saveCache("personal_spark", getScopeCacheKey(), paper.id, `${payload.model}:${payload.research_context_hash}`, payload);
     return payload;
@@ -37,13 +37,13 @@
     const settings = ensureLocalAiReady(showSettings);
     const aiSection = paperDetail.language.getAiSection(paper.ai || {}, paperDetail.language.getPreferredAiLanguage());
     const personalSpark = paperDetail.cache.getLatestCache("personal_spark", getScopeCacheKey(), paper.id);
-    const personalSparkText = personalSpark ? paperDetail.aiClient.formatPersonalSpark(personalSpark) : "暂无";
+    const personalSparkText = personalSpark ? paperDetail.aiClient.formatPersonalSpark(personalSpark) : "Not available";
     return (
       (await paperDetail.aiClient.requestLocalCompletion(
         settings,
         paperDetail.aiClient.buildFollowupPrompt({ paper, question, settings, aiSection, personalSparkText }),
         0.3,
-      )) || "无返回内容"
+      )) || "No response."
     );
   };
 

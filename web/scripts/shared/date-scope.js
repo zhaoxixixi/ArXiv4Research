@@ -77,7 +77,7 @@
     if (singleInput) singleInput.value = clampDateToAvailable(availableDates, scope.date || singleFallbackDate || maxDate);
     if (rangeStart) rangeStart.value = clampDateToAvailable(availableDates, scope.start || rangeFallbackStart || minDate || maxDate);
     if (rangeEnd) rangeEnd.value = clampDateToAvailable(availableDates, scope.end || maxDate);
-    if (availability) availability.textContent = availableDates.length ? `当前共有 ${availableDates.length} 天可用日报（${minDate} → ${maxDate}）` : "暂无可用日报";
+    if (availability) availability.textContent = availableDates.length ? `${availableDates.length} days available · ${minDate} → ${maxDate}` : "No daily reports available";
   };
 
   /** Read the currently selected scope from dialog inputs. */

@@ -24,7 +24,7 @@
     });
     if (!response.ok) {
       const text = await response.text().catch(() => "");
-      throw new Error(`请求失败 (${response.status})${text ? `: ${text.slice(0, 180)}` : ""}`);
+      throw new Error(`Request failed (${response.status})${text ? `: ${text.slice(0, 180)}` : ""}`);
     }
     const payload = await response.json();
     return (payload.choices?.[0]?.message?.content || "").trim();
@@ -72,11 +72,11 @@
       ? content.experiments.map((item, index) => `${index + 1}. ${item}`).join("\n")
       : content.experiments || "";
     return [
-      content.fit ? `适配判断：${content.fit}` : "",
-      content.idea ? `个性化想法：${content.idea}` : "",
-      experiments ? `建议实验：\n${experiments}` : "",
-      content.risk ? `主要风险：${content.risk}` : "",
-      content.next_step ? `建议下一步：${content.next_step}` : "",
+      content.fit ? `Fit: ${content.fit}` : "",
+      content.idea ? `Idea: ${content.idea}` : "",
+      experiments ? `Suggested experiments:\n${experiments}` : "",
+      content.risk ? `Risk: ${content.risk}` : "",
+      content.next_step ? `Next step: ${content.next_step}` : "",
     ]
       .filter(Boolean)
       .join("\n\n");

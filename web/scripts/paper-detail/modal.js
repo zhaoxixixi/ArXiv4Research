@@ -5,7 +5,7 @@
 
   const createController = (options = {}) => {
     const getPapers = typeof options.getPapers === "function" ? options.getPapers : () => [];
-    const getScopeLabel = typeof options.getScopeLabel === "function" ? options.getScopeLabel : () => "当前视图";
+    const getScopeLabel = typeof options.getScopeLabel === "function" ? options.getScopeLabel : () => "Current view";
     const getScopeCacheKey = typeof options.getScopeCacheKey === "function" ? options.getScopeCacheKey : () => "default";
     const onStateChange = typeof options.onStateChange === "function" ? options.onStateChange : () => {};
     const modalId = options.modalId || "paper-modal";
@@ -58,16 +58,16 @@
         const answer = modalBody.querySelector(".modal-spark-answer");
         const empty = modalBody.querySelector(".modal-spark-empty");
         button.disabled = true;
-        button.textContent = "生成中...";
+        button.textContent = "Loading...";
         try {
           const payload = await paperDetail.actions.generatePersonalSpark({ paper, getScopeCacheKey, showSettings });
           if (answer) answer.textContent = paperDetail.aiClient.formatPersonalSpark(payload), (answer.style.display = "block");
           if (empty) empty.style.display = "none";
-          button.textContent = "重新生成我的 Spark";
+          button.textContent = "Regenerate Spark";
         } catch (error) {
-          if (answer) answer.textContent = `错误: ${error.message}`, (answer.style.display = "block");
+          if (answer) answer.textContent = `Error: ${error.message}`, (answer.style.display = "block");
           if (empty) empty.style.display = "none";
-          button.textContent = "生成我的 Spark";
+          button.textContent = "Generate Spark";
         } finally {
           button.disabled = false;
         }
@@ -79,7 +79,7 @@
         const button = modalBody.querySelector(".modal-spark-btn");
         if (answer) answer.style.display = "none", (answer.textContent = "");
         if (empty) empty.style.display = "block";
-        if (button) button.textContent = "生成我的 Spark";
+        if (button) button.textContent = "Generate Spark";
       });
       modalBody.querySelector(".modal-ask-btn")?.addEventListener("click", async (event) => {
         const button = event.currentTarget;
@@ -88,14 +88,14 @@
         const question = input?.value.trim() || "";
         if (!question) return;
         button.disabled = true;
-        button.textContent = "思考中...";
+        button.textContent = "Thinking...";
         try {
           if (answer) answer.textContent = await paperDetail.actions.askFollowup({ paper, question, getScopeCacheKey, showSettings }), (answer.style.display = "block");
         } catch (error) {
-          if (answer) answer.textContent = `错误: ${error.message}`, (answer.style.display = "block");
+          if (answer) answer.textContent = `Error: ${error.message}`, (answer.style.display = "block");
         } finally {
           button.disabled = false;
-          button.textContent = "提问";
+          button.textContent = "Ask";
         }
       });
       modalBody.querySelector(".pdf-expand-btn")?.addEventListener("click", (event) => paperDetail.pdfViewer.togglePdfSize(event.currentTarget));
@@ -161,7 +161,7 @@
         settingsDialog.close();
       });
       settingsDialog.querySelector("#clear-settings")?.addEventListener("click", () => {
-        if (!window.confirm("确定要清空当前浏览器中的 API、模型与研究背景设置吗？")) return;
+        if (!window.confirm("Clear the API, model, and research context saved in this browser?")) return;
         paperDetail.settings.clearLocalSettings();
         paperDetail.settings.loadSettingsIntoDialog(settingsDialog);
         onStateChange();
@@ -189,7 +189,13 @@
         initialized = true;
         return this;
       },
-      openById, close, move, isOpen, refresh, showSettings, loadSettings,
+      openById,
+      close,
+      move,
+      isOpen,
+      refresh,
+      showSettings,
+      loadSettings,
     };
   };
 

@@ -19,14 +19,16 @@
 
   /** Format author list for compact UI display. */
   const formatAuthors = (authors = [], maxCount = 4) => {
-    if (!authors.length) return "未知";
-    return authors.length <= maxCount ? authors.join(", ") : `${authors.slice(0, maxCount).join(", ")} 等`;
+    if (!authors.length) return "Unknown";
+    return authors.length <= maxCount ? authors.join(", ") : `${authors.slice(0, maxCount).join(", ")} et al.`;
   };
 
   /** Format affiliation list for compact card display. */
   const formatAffiliations = (affiliations = [], maxCount = 3) => {
     if (!affiliations.length) return "";
-    return affiliations.length <= maxCount ? affiliations.join("；") : `${affiliations.slice(0, maxCount).join("；")} 等`;
+    return affiliations.length <= maxCount
+      ? affiliations.join("; ")
+      : `${affiliations.slice(0, maxCount).join("; ")} et al.`;
   };
 
   /** Encode paper id for use in DOM data attributes. */
@@ -34,11 +36,11 @@
 
   /** Format published date for the detail modal. */
   const formatPublished = (value) => {
-    if (!value) return "未知";
+    if (!value) return "Unknown";
     const date = new Date(value);
     return Number.isNaN(date.getTime())
       ? value
-      : date.toLocaleString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
+      : date.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" });
   };
 
   /** Convert arXiv abs URL to PDF URL. */
@@ -59,7 +61,7 @@
     const normalized = Array.isArray(ai?.keywords_normalized) ? ai.keywords_normalized : [];
     const raw = Array.isArray(ai?.keywords_raw) ? ai.keywords_raw : [];
     const preferred = normalized.length ? normalized : raw;
-    return preferred.length ? preferred.slice(0, maxCount).join("；") : "";
+    return preferred.length ? preferred.slice(0, maxCount).join("; ") : "";
   };
 
   const isPointInsideRect = (x, y, rect) => x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;

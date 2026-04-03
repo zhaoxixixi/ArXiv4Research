@@ -28,8 +28,8 @@
 
           <div class="header-actions">
             <div class="date-chip">
-              <span id="date-trigger-text" class="header-date-text">加载中...</span>
-              <button id="open-date-picker" class="icon-pill header-icon-btn" type="button" title="选择日期或日期范围" aria-label="选择日期或日期范围">
+              <span id="date-trigger-text" class="header-date-text">Loading...</span>
+              <button id="open-date-picker" class="icon-pill header-icon-btn" type="button" title="Date" aria-label="Date">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M19 4H18V2H16V4H8V2H6V4H5C3.9 4 3 4.9 3 6V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V6C21 4.9 20.1 4 19 4Z" stroke="currentColor" stroke-width="1.7" />
                   <path d="M3 9H21" stroke="currentColor" stroke-width="1.7" />
@@ -38,7 +38,7 @@
               </button>
               <select id="date-select" class="visually-hidden"></select>
             </div>
-            <a href="./statistics.html" class="icon-pill header-icon-btn nav-pill" title="查看统计页" aria-label="查看统计页">
+            <a href="./statistics.html" class="icon-pill header-icon-btn nav-pill" title="Statistics" aria-label="Statistics">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M5 5H19V19H5V5Z" stroke="currentColor" stroke-width="1.7" />
                 <path d="M9 15V11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
@@ -46,7 +46,7 @@
                 <path d="M15 15V13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
               </svg>
             </a>
-            <button id="open-theme-picker" class="icon-pill header-icon-btn" title="主题配色" aria-label="主题配色">
+            <button id="open-theme-picker" class="icon-pill header-icon-btn" title="Theme" aria-label="Theme">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M12 3C7.03 3 3 6.58 3 11C3 13.74 4.95 16.16 7.83 17.52C8.46 17.82 8.86 18.46 8.86 19.16V20C8.86 20.55 9.31 21 9.86 21H12C17.52 21 22 16.97 22 12C22 7.03 17.52 3 12 3Z" stroke="currentColor" stroke-width="1.7" />
                 <circle cx="8" cy="11" r="1.2" fill="currentColor" />
@@ -54,7 +54,7 @@
                 <circle cx="16" cy="11" r="1.2" fill="currentColor" />
               </svg>
             </button>
-            <button id="open-settings" class="icon-pill header-icon-btn" title="本地增强设置" aria-label="本地增强设置">
+            <button id="open-settings" class="icon-pill header-icon-btn" title="Settings" aria-label="Settings">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M19.14 12.94C19.18 12.64 19.2 12.32 19.2 12C19.2 11.68 19.18 11.36 19.13 11.06L21.16 9.48C21.34 9.34 21.39 9.08 21.28 8.87L19.36 5.55C19.24 5.33 18.99 5.26 18.77 5.34L16.38 6.3C15.88 5.92 15.35 5.6 14.76 5.36L14.4 2.82C14.36 2.58 14.16 2.41 13.92 2.41H10.08C9.84 2.41 9.64 2.58 9.6 2.82L9.24 5.36C8.65 5.6 8.12 5.92 7.62 6.3L5.23 5.34C5.01 5.26 4.76 5.33 4.64 5.55L2.72 8.87C2.61 9.08 2.66 9.34 2.84 9.48L4.87 11.06C4.82 11.36 4.8 11.68 4.8 12C4.8 12.32 4.82 12.64 4.87 12.94L2.84 14.52C2.66 14.66 2.61 14.92 2.72 15.13L4.64 18.45C4.76 18.67 5.01 18.74 5.23 18.66L7.62 17.7C8.12 18.08 8.65 18.4 9.24 18.64L9.6 21.18C9.64 21.42 9.84 21.59 10.08 21.59H13.92C14.16 21.59 14.36 21.42 14.4 21.18L14.76 18.64C15.35 18.4 15.88 18.08 16.38 17.7L18.77 18.66C18.99 18.74 19.24 18.67 19.36 18.45L21.28 15.13C21.39 14.92 21.34 14.66 21.16 14.52L19.14 12.94Z" stroke="currentColor" stroke-width="1.4" />
                 <circle cx="12" cy="12" r="3.1" stroke="currentColor" stroke-width="1.7" />
@@ -68,7 +68,7 @@
             <div class="filter-row">
               <span class="filter-label">DOMAIN</span>
               <div id="domain-filter-chips" class="filter-chip-scroll"></div>
-              <select id="domain-filter" class="visually-hidden"><option value="all">全部</option></select>
+              <select id="domain-filter" class="visually-hidden"><option value="all">All</option></select>
             </div>
             <div class="filter-row filter-meta-row">
               <span class="filter-label">STATUS</span>
@@ -86,10 +86,10 @@
 
     <div id="paper-modal" class="paper-modal" aria-hidden="true">
       <div class="paper-modal-content">
-        <div class="paper-modal-header"><div><div id="paper-modal-meta" class="paper-modal-meta">论文详情</div><h2 id="paper-modal-title">Paper Details</h2></div><button id="close-paper-modal" class="btn ghost modal-close-btn" aria-label="关闭详情">关闭</button></div>
+        <div class="paper-modal-header"><div><div id="paper-modal-meta" class="paper-modal-meta">Paper Details</div><h2 id="paper-modal-title">Paper Details</h2></div><button id="close-paper-modal" class="btn ghost modal-close-btn" aria-label="Close details">Close</button></div>
         <div id="paper-modal-body" class="paper-modal-body"></div>
         <div class="paper-modal-footer">
-          <div class="paper-navigation"><button id="paper-prev" type="button" class="btn ghost">上一篇</button><span id="paper-position" class="paper-position">-</span><button id="paper-next" type="button" class="btn ghost">下一篇</button></div>
+          <div class="paper-navigation"><button id="paper-prev" type="button" class="btn ghost">Previous</button><span id="paper-position" class="paper-position">-</span><button id="paper-next" type="button" class="btn ghost">Next</button></div>
           <div class="paper-modal-buttons"><a id="paper-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">arXiv</a><a id="pdf-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">PDF</a><a id="html-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">HTML</a><a id="code-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" style="display:none;">Code</a></div>
         </div>
       </div>
@@ -97,42 +97,41 @@
 
     <dialog id="settings-dialog" class="dialog">
       <form method="dialog" class="panel dialog-panel settings-panel">
-        <div class="dialog-header-block"><div class="dialog-kicker">Local Enhancement</div><h3>本地增强设置</h3><p class="dialog-lead">自动日报由 GitHub 每天生成；这里的设置只用于“生成我的 Spark / 继续提问”等本地增强能力，不会写入仓库，也不会出现在公开网页源码中。</p></div>
-        <section class="dialog-card dialog-note"><div class="dialog-note-icon">🔐</div><div><strong>仅保存在你的浏览器中</strong><p class="hint">适合把 Spark / follow-up 做成“个人增强层”，而不是公开站点的一部分。</p></div></section>
+        <div class="dialog-header-block"><div class="dialog-kicker">Local Settings</div><h3>Local Settings</h3><p class="dialog-lead">Used only for browser-local Spark and follow-up.</p></div>
         <div class="dialog-form-grid">
-          <label class="field-group field-span-2"><span>Base URL（OpenAI-compatible）</span><input id="api-base-url" placeholder="https://api.deepseek.com/v1" /></label>
+          <label class="field-group field-span-2"><span>Base URL (OpenAI-compatible)</span><input id="api-base-url" placeholder="https://api.deepseek.com/v1" /></label>
           <label class="field-group field-span-2"><span>API Key</span><input id="api-key" type="password" placeholder="sk-..." /></label>
           <label class="field-group"><span>Model</span><input id="api-model" placeholder="deepseek-chat" /></label>
-          <label class="field-group"><span>本地保存方式</span><select id="storage-mode"><option value="local">记住此设备（localStorage，推荐自用）</option><option value="session">仅本次会话（sessionStorage，更安全）</option></select></label>
-          <label class="field-group field-span-2"><span>你的当前研究背景（用于 personalized spark / follow-up）</span><textarea id="research-context" placeholder="例如：我目前关注 Biology × Computer Science，尤其是 single-cell、trajectory prediction、SSA/CME、surrogate modeling、flow matching。希望得到尽量具体、可实验的建议。"></textarea></label>
+          <label class="field-group"><span>Storage</span><select id="storage-mode"><option value="local">This device (localStorage)</option><option value="session">This session (sessionStorage)</option></select></label>
+          <label class="field-group field-span-2"><span>Research context</span><textarea id="research-context" placeholder="Describe your current research focus for local Spark and follow-up."></textarea></label>
         </div>
-        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">关闭</button><button id="save-settings" value="default" class="btn dialog-primary-btn">保存设置</button><button id="clear-settings" type="button" class="btn ghost danger dialog-danger-btn">清空本地设置</button></menu>
+        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">Close</button><button id="save-settings" value="default" class="btn dialog-primary-btn">Save</button><button id="clear-settings" type="button" class="btn ghost danger dialog-danger-btn">Clear</button></menu>
       </form>
     </dialog>
 
     <dialog id="theme-dialog" class="dialog">
       <form method="dialog" class="panel dialog-panel theme-dialog-panel">
-        <div class="dialog-header-block"><div class="dialog-kicker">Reading Theme</div><h3>主题配色</h3><p class="dialog-lead">提供几套适合长时间阅读的背景与强调色预设。主题仅保存在当前浏览器中。</p></div>
+        <div class="dialog-header-block"><div class="dialog-kicker">Theme</div><h3>Theme</h3><p class="dialog-lead">Choose a reading preset.</p></div>
         <section class="dialog-card"><div class="theme-grid">
-          <button type="button" class="theme-option" data-theme="lavender"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#fafbff"></span><span class="theme-swatch" style="--swatch:#eef2ff"></span><span class="theme-swatch" style="--swatch:#667eea"></span></span><span class="theme-copy"><strong>天空蓝</strong><small>参考站点风格，轻盈、明亮、适合日常浏览。</small></span></button>
-          <button type="button" class="theme-option" data-theme="pearl"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#ffffff"></span><span class="theme-swatch" style="--swatch:#f3f6ff"></span><span class="theme-swatch" style="--swatch:#7c3aed"></span></span><span class="theme-copy"><strong>浅紫科技</strong><small>更纯净的浅色背景，适合白天长时间阅读。</small></span></button>
-          <button type="button" class="theme-option" data-theme="sage"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#edf3ee"></span><span class="theme-swatch" style="--swatch:#f8fcf8"></span><span class="theme-swatch" style="--swatch:#5b8a72"></span></span><span class="theme-copy"><strong>鼠尾草</strong><small>轻微绿灰调，安静克制，适合长时间浏览。</small></span></button>
-          <button type="button" class="theme-option" data-theme="graphite"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#090c11"></span><span class="theme-swatch" style="--swatch:#121822"></span><span class="theme-swatch" style="--swatch:#7dd3fc"></span></span><span class="theme-copy"><strong>石墨夜色</strong><small>保留夜间版本，低刺激、适合深夜查看论文。</small></span></button>
+          <button type="button" class="theme-option" data-theme="lavender"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#fafbff"></span><span class="theme-swatch" style="--swatch:#eef2ff"></span><span class="theme-swatch" style="--swatch:#667eea"></span></span><span class="theme-copy"><strong>Sky Blue</strong><small>Light, bright, and easy to scan.</small></span></button>
+          <button type="button" class="theme-option" data-theme="pearl"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#ffffff"></span><span class="theme-swatch" style="--swatch:#f3f6ff"></span><span class="theme-swatch" style="--swatch:#7c3aed"></span></span><span class="theme-copy"><strong>Soft Violet</strong><small>Clean light mode with a violet accent.</small></span></button>
+          <button type="button" class="theme-option" data-theme="sage"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#edf3ee"></span><span class="theme-swatch" style="--swatch:#f8fcf8"></span><span class="theme-swatch" style="--swatch:#5b8a72"></span></span><span class="theme-copy"><strong>Sage</strong><small>Quiet green-gray tones for long reading.</small></span></button>
+          <button type="button" class="theme-option" data-theme="graphite"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#090c11"></span><span class="theme-swatch" style="--swatch:#121822"></span><span class="theme-swatch" style="--swatch:#7dd3fc"></span></span><span class="theme-copy"><strong>Graphite Night</strong><small>Low-stimulation dark mode.</small></span></button>
         </div></section>
-        <menu class="dialog-actions dialog-actions-split"><button id="reset-theme" type="button" class="btn ghost dialog-secondary-btn">恢复默认</button><div class="dialog-actions-right"><button value="cancel" class="btn dialog-primary-btn">完成</button></div></menu>
+        <menu class="dialog-actions dialog-actions-split"><button id="reset-theme" type="button" class="btn ghost dialog-secondary-btn">Reset</button><div class="dialog-actions-right"><button value="cancel" class="btn dialog-primary-btn">Done</button></div></menu>
       </form>
     </dialog>
 
     <dialog id="date-dialog" class="dialog">
       <form method="dialog" class="panel dialog-panel date-dialog-panel">
-        <div class="dialog-header-block"><div class="dialog-kicker">Daily Scope</div><h3>选择日报日期</h3><p class="dialog-lead">支持单日浏览，也支持按日期范围聚合多天日报内容。</p></div>
+        <div class="dialog-header-block"><div class="dialog-kicker">Daily Scope</div><h3>Date Range</h3><p class="dialog-lead">Browse one day or a multi-day range.</p></div>
         <section class="dialog-card">
-          <div class="date-mode-section"><div class="date-mode-toggle" role="group" aria-label="日期模式"><button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">单日</button><button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">范围</button></div></div>
-          <section id="single-date-group" class="date-input-group"><label for="single-date-input">选择日期</label><input id="single-date-input" type="date" /></section>
-          <section id="range-date-group" class="date-range-grid hidden"><div class="date-input-group"><label for="range-start-input">开始日期</label><input id="range-start-input" type="date" /></div><div class="date-input-group"><label for="range-end-input">结束日期</label><input id="range-end-input" type="date" /></div></section>
+          <div class="date-mode-section"><div class="date-mode-toggle" role="group" aria-label="Scope mode"><button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">Single</button><button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">Range</button></div></div>
+          <section id="single-date-group" class="date-input-group"><label for="single-date-input">Date</label><input id="single-date-input" type="date" /></section>
+          <section id="range-date-group" class="date-range-grid hidden"><div class="date-input-group"><label for="range-start-input">Start</label><input id="range-start-input" type="date" /></div><div class="date-input-group"><label for="range-end-input">End</label><input id="range-end-input" type="date" /></div></section>
         </section>
-        <section class="dialog-card date-quick-card"><div class="section-head"><strong>快速范围</strong><span id="date-dialog-availability" class="mini-hint"></span></div><div class="date-quick-actions"><button type="button" class="template-btn date-quick-btn" data-range="latest">最新一天</button><button type="button" class="template-btn date-quick-btn" data-range="3">最近 3 天</button><button type="button" class="template-btn date-quick-btn" data-range="7">最近 7 天</button><button type="button" class="template-btn date-quick-btn" data-range="all">全部可用</button></div></section>
-        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">关闭</button><button id="apply-date-selection" type="button" class="btn dialog-primary-btn">应用</button></menu>
+        <section class="dialog-card date-quick-card"><div class="section-head"><strong>Quick Range</strong><span id="date-dialog-availability" class="mini-hint"></span></div><div class="date-quick-actions"><button type="button" class="template-btn date-quick-btn" data-range="latest">Latest</button><button type="button" class="template-btn date-quick-btn" data-range="3">Last 3 Days</button><button type="button" class="template-btn date-quick-btn" data-range="7">Last 7 Days</button><button type="button" class="template-btn date-quick-btn" data-range="all">All</button></div></section>
+        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">Close</button><button id="apply-date-selection" type="button" class="btn dialog-primary-btn">Apply</button></menu>
       </form>
     </dialog>
 

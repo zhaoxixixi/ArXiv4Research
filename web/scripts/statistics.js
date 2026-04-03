@@ -23,7 +23,7 @@
 
   const renderSummary = (scopeDates) => {
     const domains = new Set(currentPapers.map((paper) => paper.domain || "general")).size;
-    document.getElementById("statistics-summary").innerHTML = `<span class="meta-pill meta-pill-strong">${escapeHtml(currentDateLabel)}</span><span class="meta-pill">${escapeHtml(String(currentPapers.length || 0))} 篇当前结果</span><span class="meta-pill">${escapeHtml(String(domains || 0))} 个领域</span><span class="meta-pill">${currentDateMode === "range" ? `${scopeDates.length} 天聚合统计` : "单日统计"}</span><span class="meta-pill">点击论文卡片直接查看详情</span>`;
+    document.getElementById("statistics-summary").innerHTML = `<span class="meta-pill meta-pill-strong">${escapeHtml(currentDateLabel)}</span><span class="meta-pill">${escapeHtml(String(currentPapers.length || 0))} papers</span><span class="meta-pill">${escapeHtml(String(domains || 0))} domains</span><span class="meta-pill">${currentDateMode === "range" ? `${scopeDates.length}-day stats` : "Single day"}</span>`;
   };
 
   const bindRelatedPaperEvents = () => {
@@ -46,16 +46,16 @@
     document.getElementById("related-papers").innerHTML = currentRelatedPapers.length
       ? currentRelatedPapers
           .map((paper) => `
-            <article class="related-paper-card" data-paper-id="${normalizePaperId(paper.id)}" tabindex="0" role="button" aria-label="打开 ${escapeHtml(paper.title || "论文详情")}">
+            <article class="related-paper-card" data-paper-id="${normalizePaperId(paper.id)}" tabindex="0" role="button" aria-label="Open ${escapeHtml(paper.title || "paper details")}">
               <div class="related-paper-top"><span class="tag">${escapeHtml(paper.domain || "general")}</span><span class="tag">${escapeHtml(paper.source_date || (paper.report_dates || [])[0] || "-")}</span></div>
               <h3 class="related-paper-title">${escapeHtml(paper.title)}</h3>
               <p class="related-paper-authors">${escapeHtml(formatAuthors(paper.authors || []))}</p>
-              <div class="related-paper-snippet">${escapeHtml(previewText(paper.ai?.tldr || paper.summary || "", 170))}</div>
-              <div class="related-paper-actions"><span class="mini-hint">相关度 ${escapeHtml(String(paper.relevance_score ?? ""))}</span><div class="paper-modal-buttons"><a class="btn ghost resource-btn" href="${escapeHtml(paper.link || "#")}" target="_blank" rel="noreferrer">arXiv</a><a class="btn ghost resource-btn" href="${escapeHtml(derivePdfUrl(paper.link))}" target="_blank" rel="noreferrer">PDF</a></div></div>
+              <div class="related-paper-snippet">${escapeHtml(previewText(detail.utils.getAiSection(paper.ai || {}, "zh").tldr || paper.summary || "", 170))}</div>
+              <div class="related-paper-actions"><span class="mini-hint">Score ${escapeHtml(String(paper.relevance_score ?? ""))}</span><div class="paper-modal-buttons"><a class="btn ghost resource-btn" href="${escapeHtml(paper.link || "#")}" target="_blank" rel="noreferrer">arXiv</a><a class="btn ghost resource-btn" href="${escapeHtml(derivePdfUrl(paper.link))}" target="_blank" rel="noreferrer">PDF</a></div></div>
             </article>
           `)
           .join("")
-      : '<div class="stats-empty">当前范围内没有命中该关键词的论文。</div>';
+      : '<div class="stats-empty">No papers match this keyword in the current scope.</div>';
     document.querySelectorAll(".keyword-item").forEach((button) => button.classList.toggle("active", button.dataset.keyword === keyword));
     bindRelatedPaperEvents();
   };
@@ -67,7 +67,7 @@
       currentKeyword = "";
       currentRelatedPapers = [];
       if (paperDetailController?.isOpen()) paperDetailController.close();
-      container.innerHTML = '<div class="stats-empty">当前结果较少，暂时无法生成稳定的热门关键词。</div>';
+      container.innerHTML = '<div class="stats-empty">Not enough papers to build stable keywords yet.</div>';
       document.getElementById("related-papers").innerHTML = "";
       document.getElementById("related-title").textContent = "Related Papers";
       return;
@@ -79,7 +79,7 @@
 
   const loadScope = async (scope) => {
     const scopeDates = getScopeDates(availableDates, scope);
-    if (!scopeDates.length) throw new Error("当前所选日期范围内没有可用日报");
+    if (!scopeDates.length) throw new Error("No daily reports found in the selected range.");
     currentPapers = aggregateDailyPayloads(await Promise.all(scopeDates.map((date) => fetchDataJson(`daily/${date}.json`))));
     currentDateMode = scope.mode;
     currentDate = scope.mode === "single" ? scope.date : scopeDates[0];
@@ -99,7 +99,7 @@
     enableDialogOutsideClose(document.getElementById("date-dialog"));
     paperDetailController = detail.createController({ getPapers: () => currentRelatedPapers, getScopeLabel: () => (currentKeyword ? `${currentDateLabel} · ${currentKeyword}` : currentDateLabel), getScopeCacheKey: buildScopeCacheKey }).init();
     const initial = index.latest || availableDates[0];
-    if (!initial) return void (document.getElementById("statistics-summary").innerHTML = '<div class="stats-empty">暂无数据，请先运行 pipeline。</div>');
+    if (!initial) return void (document.getElementById("statistics-summary").innerHTML = '<div class="stats-empty">No data yet. Run the pipeline first.</div>');
     await loadScope({ mode: "single", date: initial });
     syncDateSelectionDialog({ mode: "single", date: initial });
     document.getElementById("open-date-picker").addEventListener("click", () => {
@@ -115,22 +115,22 @@
     document.getElementById("apply-date-selection").addEventListener("click", async () => {
       const button = document.getElementById("apply-date-selection");
       button.disabled = true;
-      button.textContent = "加载中...";
+      button.textContent = "Loading...";
       try {
         const scope = readScopeFromDialog(availableDates);
         await loadScope(scope.mode === "range" ? scope : { mode: "single", date: clampDateToAvailable(availableDates, scope.date) });
         document.getElementById("date-dialog").close();
       } catch (error) {
-        window.alert(error.message || "加载统计数据失败");
+        window.alert(error.message || "Failed to load statistics.");
       } finally {
         button.disabled = false;
-        button.textContent = "应用到统计页";
+        button.textContent = "Apply";
         syncDateSelectionDialog();
       }
     });
   };
 
   main().catch((error) => {
-    document.getElementById("statistics-summary").innerHTML = `<div class="stats-empty">加载失败：${escapeHtml(error.message || "unknown error")}</div>`;
+    document.getElementById("statistics-summary").innerHTML = `<div class="stats-empty">Load failed: ${escapeHtml(error.message || "unknown error")}</div>`;
   });
 })();

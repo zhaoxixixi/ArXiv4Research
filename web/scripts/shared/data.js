@@ -37,7 +37,7 @@
         return payload;
       }
     }
-    throw new Error(`无法定位数据目录。已尝试: ${candidates.join(", ")}`);
+    throw new Error(`Unable to locate the data directory. Tried: ${candidates.join(", ")}`);
   };
 
   /** Fetch a JSON file relative to the resolved data root. */

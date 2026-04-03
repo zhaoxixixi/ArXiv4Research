@@ -8,7 +8,7 @@
     if (!expanded) return;
     expanded.classList.remove("expanded");
     const button = document.querySelector(".pdf-expand-btn");
-    if (button) button.textContent = "放大";
+    if (button) button.textContent = "Expand";
   };
 
   const togglePdfSize = (button) => {
@@ -23,7 +23,7 @@
     overlay.addEventListener("click", () => togglePdfSize(button));
     document.body.appendChild(overlay);
     container.classList.add("expanded");
-    button.textContent = "恢复";
+    button.textContent = "Restore";
   };
 
   paperDetail.pdfViewer = { removePdfOverlay, togglePdfSize };

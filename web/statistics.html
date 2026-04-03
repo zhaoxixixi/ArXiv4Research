@@ -16,8 +16,8 @@
           <a class="project-pill" href="./index.html" aria-label="ArXiv4Research"><span class="project-pill-dot"></span><span class="project-pill-text">ArXiv4Research</span></a>
           <div class="brand-lockup"><div class="brand-mark">AR</div><div class="brand-copy"><h1>Statistics</h1><p class="sub">Popular keywords and cross-day topic overview</p></div></div>
           <div class="header-actions">
-            <div class="date-chip"><span id="date-trigger-text" class="header-date-text">加载中...</span><button id="open-date-picker" class="icon-pill header-icon-btn" type="button" title="选择日期或日期范围" aria-label="选择日期或日期范围"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 4H18V2H16V4H8V2H6V4H5C3.9 4 3 4.9 3 6V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V6C21 4.9 20.1 4 19 4Z" stroke="currentColor" stroke-width="1.7" /><path d="M3 9H21" stroke="currentColor" stroke-width="1.7" /><path d="M8 12H12V16H8V12Z" fill="currentColor" opacity="0.18" /></svg></button></div>
-            <a href="./index.html" class="icon-pill header-icon-btn nav-pill" title="返回日报主页" aria-label="返回日报主页"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor" /></svg></a>
+            <div class="date-chip"><span id="date-trigger-text" class="header-date-text">Loading...</span><button id="open-date-picker" class="icon-pill header-icon-btn" type="button" title="Date" aria-label="Date"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 4H18V2H16V4H8V2H6V4H5C3.9 4 3 4.9 3 6V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V6C21 4.9 20.1 4 19 4Z" stroke="currentColor" stroke-width="1.7" /><path d="M3 9H21" stroke="currentColor" stroke-width="1.7" /><path d="M8 12H12V16H8V12Z" fill="currentColor" opacity="0.18" /></svg></button></div>
+            <a href="./index.html" class="icon-pill header-icon-btn nav-pill" title="Daily" aria-label="Daily"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor" /></svg></a>
           </div>
         </div>
       </header>
@@ -32,33 +32,32 @@
 
     <dialog id="date-dialog" class="dialog">
       <form method="dialog" class="panel dialog-panel date-dialog-panel">
-        <div class="dialog-header-block"><div class="dialog-kicker">Daily Scope</div><h3>选择统计日期</h3><p class="dialog-lead">支持单日统计，也支持按日期范围聚合多天结果，整体风格与主页日报面板保持一致。</p></div>
-        <section class="dialog-card"><div class="date-mode-section"><div class="date-mode-toggle" role="group" aria-label="日期模式"><button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">单日</button><button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">范围</button></div></div><section id="single-date-group" class="date-input-group"><label for="single-date-input">选择日期</label><input id="single-date-input" type="date" /></section><section id="range-date-group" class="date-range-grid hidden"><div class="date-input-group"><label for="range-start-input">开始日期</label><input id="range-start-input" type="date" /></div><div class="date-input-group"><label for="range-end-input">结束日期</label><input id="range-end-input" type="date" /></div></section></section>
-        <section class="dialog-card date-quick-card"><div class="section-head"><strong>快速范围</strong><span id="date-dialog-availability" class="mini-hint"></span></div><div class="date-quick-actions"><button type="button" class="template-btn date-quick-btn" data-range="latest">最新一天</button><button type="button" class="template-btn date-quick-btn" data-range="3">最近 3 天</button><button type="button" class="template-btn date-quick-btn" data-range="7">最近 7 天</button><button type="button" class="template-btn date-quick-btn" data-range="all">全部可用</button></div></section>
-        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">关闭</button><button id="apply-date-selection" type="button" class="btn dialog-primary-btn">应用到统计页</button></menu>
+        <div class="dialog-header-block"><div class="dialog-kicker">Daily Scope</div><h3>Date Range</h3><p class="dialog-lead">Browse one day or a multi-day range.</p></div>
+        <section class="dialog-card"><div class="date-mode-section"><div class="date-mode-toggle" role="group" aria-label="Scope mode"><button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">Single</button><button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">Range</button></div></div><section id="single-date-group" class="date-input-group"><label for="single-date-input">Date</label><input id="single-date-input" type="date" /></section><section id="range-date-group" class="date-range-grid hidden"><div class="date-input-group"><label for="range-start-input">Start</label><input id="range-start-input" type="date" /></div><div class="date-input-group"><label for="range-end-input">End</label><input id="range-end-input" type="date" /></div></section></section>
+        <section class="dialog-card date-quick-card"><div class="section-head"><strong>Quick Range</strong><span id="date-dialog-availability" class="mini-hint"></span></div><div class="date-quick-actions"><button type="button" class="template-btn date-quick-btn" data-range="latest">Latest</button><button type="button" class="template-btn date-quick-btn" data-range="3">Last 3 Days</button><button type="button" class="template-btn date-quick-btn" data-range="7">Last 7 Days</button><button type="button" class="template-btn date-quick-btn" data-range="all">All</button></div></section>
+        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">Close</button><button id="apply-date-selection" type="button" class="btn dialog-primary-btn">Apply</button></menu>
       </form>
     </dialog>
 
     <div id="paper-modal" class="paper-modal" aria-hidden="true">
       <div class="paper-modal-content">
-        <div class="paper-modal-header"><div><div id="paper-modal-meta" class="paper-modal-meta">论文详情</div><h2 id="paper-modal-title">Paper Details</h2></div><button id="close-paper-modal" class="btn ghost modal-close-btn" aria-label="关闭详情">关闭</button></div>
+        <div class="paper-modal-header"><div><div id="paper-modal-meta" class="paper-modal-meta">Paper Details</div><h2 id="paper-modal-title">Paper Details</h2></div><button id="close-paper-modal" class="btn ghost modal-close-btn" aria-label="Close details">Close</button></div>
         <div id="paper-modal-body" class="paper-modal-body"></div>
-        <div class="paper-modal-footer"><div class="paper-navigation"><button id="paper-prev" type="button" class="btn ghost">上一篇</button><span id="paper-position" class="paper-position">-</span><button id="paper-next" type="button" class="btn ghost">下一篇</button></div><div class="paper-modal-buttons"><a id="paper-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">arXiv</a><a id="pdf-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">PDF</a><a id="html-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">HTML</a><a id="code-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" style="display:none;">Code</a></div></div>
+        <div class="paper-modal-footer"><div class="paper-navigation"><button id="paper-prev" type="button" class="btn ghost">Previous</button><span id="paper-position" class="paper-position">-</span><button id="paper-next" type="button" class="btn ghost">Next</button></div><div class="paper-modal-buttons"><a id="paper-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">arXiv</a><a id="pdf-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">PDF</a><a id="html-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">HTML</a><a id="code-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" style="display:none;">Code</a></div></div>
       </div>
     </div>
 
     <dialog id="settings-dialog" class="dialog">
       <form method="dialog" class="panel dialog-panel settings-panel">
-        <div class="dialog-header-block"><div class="dialog-kicker">Local Enhancement</div><h3>本地增强设置</h3><p class="dialog-lead">自动日报由 GitHub 每天生成；这里的设置只用于“生成我的 Spark / 继续提问”等本地增强能力，不会写入仓库，也不会出现在公开网页源码中。</p></div>
-        <section class="dialog-card dialog-note"><div class="dialog-note-icon">🔐</div><div><strong>仅保存在你的浏览器中</strong><p class="hint">适合把 Spark / follow-up 做成“个人增强层”，而不是公开站点的一部分。</p></div></section>
+        <div class="dialog-header-block"><div class="dialog-kicker">Local Settings</div><h3>Local Settings</h3><p class="dialog-lead">Used only for browser-local Spark and follow-up.</p></div>
         <div class="dialog-form-grid">
-          <label class="field-group field-span-2"><span>Base URL（OpenAI-compatible）</span><input id="api-base-url" placeholder="https://api.deepseek.com/v1" /></label>
+          <label class="field-group field-span-2"><span>Base URL (OpenAI-compatible)</span><input id="api-base-url" placeholder="https://api.deepseek.com/v1" /></label>
           <label class="field-group field-span-2"><span>API Key</span><input id="api-key" type="password" placeholder="sk-..." /></label>
           <label class="field-group"><span>Model</span><input id="api-model" placeholder="deepseek-chat" /></label>
-          <label class="field-group"><span>本地保存方式</span><select id="storage-mode"><option value="local">记住此设备（localStorage，推荐自用）</option><option value="session">仅本次会话（sessionStorage，更安全）</option></select></label>
-          <label class="field-group field-span-2"><span>你的当前研究背景（用于 personalized spark / follow-up）</span><textarea id="research-context" placeholder="例如：我目前关注 Biology × Computer Science，尤其是 single-cell、trajectory prediction、SSA/CME、surrogate modeling、flow matching。希望得到尽量具体、可实验的建议。"></textarea></label>
+          <label class="field-group"><span>Storage</span><select id="storage-mode"><option value="local">This device (localStorage)</option><option value="session">This session (sessionStorage)</option></select></label>
+          <label class="field-group field-span-2"><span>Research context</span><textarea id="research-context" placeholder="Describe your current research focus for local Spark and follow-up."></textarea></label>
         </div>
-        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">关闭</button><button id="save-settings" value="default" class="btn dialog-primary-btn">保存设置</button><button id="clear-settings" type="button" class="btn ghost danger dialog-danger-btn">清空本地设置</button></menu>
+        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">Close</button><button id="save-settings" value="default" class="btn dialog-primary-btn">Save</button><button id="clear-settings" type="button" class="btn ghost danger dialog-danger-btn">Clear</button></menu>
       </form>
     </dialog>
 
