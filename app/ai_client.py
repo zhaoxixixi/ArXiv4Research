@@ -10,50 +10,9 @@ from urllib.request import Request, urlopen
 from openai import OpenAI
 
 from .models import Paper
+from .prompts import get_prompt, render_prompt_template
 
 logger = logging.getLogger(__name__)
-
-SYSTEM_PROMPT = """You are a research assistant for AI4Science.
-Return strict JSON only.
-Top-level keys must be exactly: affiliations, keywords_raw, keywords_normalized, zh, en.
-
-For affiliations:
-- return a concise list of institution / department / laboratory names
-- remove street addresses, room numbers, postcodes, emails, URLs, and author-note noise
-- do not invent affiliations unsupported by the provided candidates
-- if unsure, return an empty list
-
-For keywords_raw:
-- return 3 to 8 paper-specific topic phrases
-- keep them concrete and close to the paper itself
-
-For keywords_normalized:
-- return 3 to 6 normalized topic labels suitable for cross-paper aggregation
-- prefer broader, stable research themes over overly specific paper phrases
-- do not output obvious parent/child near-duplicates together
-- for example, if a raw keyword is "diffusion MRI", normalized keywords may be "diffusion" and "medical imaging"
-
-For both zh and en, include keys:
-tldr, motivation, method, result, help_to_user, idea_spark.
-
-For idea_spark, include keys:
-transferable, idea, risk, inspiration.
-
-Requirements:
-- zh: concise Simplified Chinese
-- en: concise English
-- Stay factual and grounded in the provided title/abstract only
-- Do not invent unavailable experimental details
-"""
-AFFILIATION_CLEANUP_SYSTEM_PROMPT = """You normalize noisy author affiliation strings extracted from arXiv pages.
-Return strict JSON only with the top-level key: affiliations.
-
-Requirements:
-- affiliations must be a list of concise institution / department / laboratory names
-- remove street addresses, room numbers, postcodes, country-only fragments, emails, URLs, and author notes
-- do not invent affiliations that are not supported by the candidate strings
-- if the candidates are insufficient, return an empty list
-"""
 
 ANALYSIS_TEXT_FIELDS = ("tldr", "motivation", "method", "result", "help_to_user")
 IDEA_SPARK_FIELDS = ("idea", "risk", "inspiration")
@@ -417,6 +376,7 @@ def maybe_refine_affiliations_with_llm(
     model: str,
     *,
     enabled: bool = True,
+    prompt_dir: str | None = None,
 ) -> list[str]:
     current = paper.affiliations or []
     if not enabled or not _paper_needs_affiliation_llm_cleanup(paper):
@@ -426,12 +386,15 @@ def maybe_refine_affiliations_with_llm(
     if not evidence:
         return current
 
-    user_prompt = (
-        f"Paper title: {paper.title}\n"
-        f"Authors: {', '.join(paper.authors) if paper.authors else 'Unknown'}\n"
-        f"Current cleaned affiliations: {json.dumps(current, ensure_ascii=False)}\n"
-        f"Raw affiliation candidates: {json.dumps(evidence, ensure_ascii=False)}\n"
-        "Normalize these into a short affiliation list. JSON only."
+    system_prompt = get_prompt("affiliation_cleanup_system", prompt_dir)
+    user_prompt = render_prompt_template(
+        get_prompt("affiliation_cleanup_user", prompt_dir),
+        {
+            "title": paper.title,
+            "authors_csv": ", ".join(paper.authors) if paper.authors else "Unknown",
+            "current_affiliations_json": json.dumps(current, ensure_ascii=False),
+            "raw_affiliation_candidates_json": json.dumps(evidence, ensure_ascii=False),
+        },
     )
 
     try:
@@ -439,7 +402,7 @@ def maybe_refine_affiliations_with_llm(
             model=model,
             temperature=0.0,
             messages=[
-                {"role": "system", "content": AFFILIATION_CLEANUP_SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
         )
@@ -454,22 +417,32 @@ def maybe_refine_affiliations_with_llm(
     return current
 
 
-def analyze_paper(client: OpenAI, paper: Paper, model: str, language: str, temperature: float) -> tuple[dict, list[str]]:
-    user_prompt = (
-        f"Preferred UI language: {language}\n"
-        f"Title: {paper.title}\n"
-        f"Abstract: {paper.summary}\n"
-        f"Authors: {json.dumps(paper.authors or [], ensure_ascii=False)}\n"
-        f"Domain: {paper.domain}\n"
-        f"Current extracted affiliations: {json.dumps(paper.affiliations or [], ensure_ascii=False)}\n"
-        f"Raw affiliation candidates: {json.dumps((paper.affiliation_evidence or [])[:8], ensure_ascii=False)}\n"
-        "Return strict JSON only with top-level keys affiliations, keywords_raw, keywords_normalized, zh, en."
+def analyze_paper(
+    client: OpenAI,
+    paper: Paper,
+    model: str,
+    language: str,
+    temperature: float,
+    prompt_dir: str | None = None,
+) -> tuple[dict, list[str]]:
+    system_prompt = get_prompt("analysis_system", prompt_dir)
+    user_prompt = render_prompt_template(
+        get_prompt("analysis_user", prompt_dir),
+        {
+            "language": language,
+            "title": paper.title,
+            "abstract": paper.summary,
+            "authors_json": json.dumps(paper.authors or [], ensure_ascii=False),
+            "domain": paper.domain,
+            "current_affiliations_json": json.dumps(paper.affiliations or [], ensure_ascii=False),
+            "raw_affiliation_candidates_json": json.dumps((paper.affiliation_evidence or [])[:8], ensure_ascii=False),
+        },
     )
     response = client.chat.completions.create(
         model=model,
         temperature=temperature,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
     )
@@ -484,27 +457,37 @@ def analyze_paper(client: OpenAI, paper: Paper, model: str, language: str, tempe
     return _normalize_analysis_result({}, language, fallback_text=content.strip())
 
 
-def followup_answer(client: OpenAI, model: str, temperature: float, language: str, paper: Paper, question: str, research_context: str) -> str:
+def followup_answer(
+    client: OpenAI,
+    model: str,
+    temperature: float,
+    language: str,
+    paper: Paper,
+    question: str,
+    research_context: str,
+    prompt_dir: str | None = None,
+) -> str:
+    system_prompt = render_prompt_template(
+        get_prompt("followup_system", prompt_dir),
+        {
+            "language": language,
+        },
+    )
+    user_prompt = render_prompt_template(
+        get_prompt("followup_user", prompt_dir),
+        {
+            "research_context": research_context,
+            "title": paper.title,
+            "abstract": paper.summary,
+            "question": question,
+        },
+    )
     response = client.chat.completions.create(
         model=model,
         temperature=temperature,
         messages=[
-            {
-                "role": "system",
-                "content": (
-                    f"You are a concise research copilot. Reply in {language}. "
-                    "Answer based on the paper and user context. Use practical, experiment-oriented suggestions."
-                ),
-            },
-            {
-                "role": "user",
-                "content": (
-                    f"User research context:\n{research_context}\n\n"
-                    f"Paper title: {paper.title}\n"
-                    f"Paper abstract: {paper.summary}\n"
-                    f"Question: {question}"
-                ),
-            },
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
         ],
     )
     return (response.choices[0].message.content or "").strip()

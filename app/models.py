@@ -39,6 +39,7 @@ class Config:
     keep_days: int
     timezone: str
     language: str
+    prompt_dir: str
     max_feed_items_per_category: int
     domains: list[DomainBucket]
     research_context: str

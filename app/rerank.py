@@ -5,6 +5,7 @@ import math
 
 from .ai_client import get_embeddings, rerank_documents
 from .models import DomainBucket, Paper
+from .prompts import get_prompt, render_prompt_template
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +36,14 @@ def _weighted_score(base_score: float, domain_name: str, domains: list[DomainBuc
     return 1.0 - (1.0 - bounded) ** weight
 
 
-def _build_query(research_context: str, keywords: list[str]) -> str:
-    return f"Research context:\n{research_context}\n\nKeywords: {', '.join(keywords)}"
+def _build_query(research_context: str, keywords: list[str], prompt_dir: str | None = None) -> str:
+    return render_prompt_template(
+        get_prompt("rerank_query", prompt_dir),
+        {
+            "research_context": research_context,
+            "keywords_csv": ", ".join(keywords),
+        },
+    )
 
 
 def _build_doc_text(paper: Paper) -> str:
@@ -131,11 +138,12 @@ def rank_papers(
     rerank_model: str = "qwen3-rerank",
     rerank_pool_size: int = 60,
     rerank_instruct: str = "",
+    prompt_dir: str | None = None,
 ) -> list[Paper]:
     if not papers:
         return []
 
-    query = _build_query(research_context, keywords)
+    query = _build_query(research_context, keywords, prompt_dir)
     ranked = _embedding_rank(
         embedding_client=embedding_client,
         papers=papers,

@@ -1,0 +1,6 @@
+User research context:
+[[research_context]]
+
+Paper title: [[title]]
+Paper abstract: [[abstract]]
+Question: [[question]]

@@ -42,6 +42,7 @@ def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data"
         rerank_model=cfg.rerank_model,
         rerank_pool_size=cfg.rerank_pool_size,
         rerank_instruct=cfg.rerank_instruct,
+        prompt_dir=cfg.prompt_dir,
     )
     top = select_top_papers_balanced(
         ranked_papers=ranked,
@@ -58,6 +59,7 @@ def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data"
             model=cfg.analysis_model,
             language=cfg.language,
             temperature=cfg.analysis_temperature,
+            prompt_dir=cfg.prompt_dir,
         )
         if analyzed_affiliations:
             paper.affiliations = analyzed_affiliations
@@ -67,6 +69,7 @@ def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data"
                 paper=paper,
                 model=cfg.affiliation_llm_fallback_model,
                 enabled=cfg.affiliation_llm_fallback_enabled,
+                prompt_dir=cfg.prompt_dir,
             )
 
     generated_at_local = datetime.now(report_timezone)

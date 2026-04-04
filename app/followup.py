@@ -51,6 +51,7 @@ def main() -> None:
         paper=paper,
         question=args.question,
         research_context=cfg.research_context,
+        prompt_dir=cfg.prompt_dir,
     )
     print(answer)
 

@@ -1,0 +1,8 @@
+Preferred UI language: [[language]]
+Title: [[title]]
+Abstract: [[abstract]]
+Authors: [[authors_json]]
+Domain: [[domain]]
+Current extracted affiliations: [[current_affiliations_json]]
+Raw affiliation candidates: [[raw_affiliation_candidates_json]]
+Return strict JSON only with top-level keys affiliations, keywords_raw, keywords_normalized, zh, en.

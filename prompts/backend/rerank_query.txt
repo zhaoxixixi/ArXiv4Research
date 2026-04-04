@@ -1,0 +1,13 @@
+Research context:
+[[research_context]]
+
+Priority method interests:
+[[keywords_csv]]
+
+Please prioritize papers that are strongly relevant to:
+- symbolic regression
+- neural operators / operator learning
+- scientific machine learning
+- equation discovery
+- surrogate modeling
+- transferable methods for biological or stochastic dynamical systems

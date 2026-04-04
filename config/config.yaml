@@ -1,13 +1,16 @@
 project:
-  title: ArXiv Research Assistant (Local Test)
-  top_k: 5
-  keep_days: 7
+  title: ArXiv Research Assistant
+  top_k: 10
+  keep_days: 30
   timezone: Asia/Shanghai
   language: Chinese
 
+prompts:
+  # Editable backend prompt templates.
+  dir: prompts/backend
+
 retrieval:
-  # 本地测试默认使用较小抓取规模，便于快速验证页面与 pipeline 效果
-  max_feed_items_per_category: 20
+  max_feed_items_per_category: 50
   domains:
     - name: biology
       priority: 100
@@ -40,11 +43,12 @@ retrieval:
       priority: 90
       filter_mode: hard
       categories:
-        - cs.AI
         - cs.LG
         - cs.CE
         - cs.NE
         - cs.SY
+        - cs.GR
+        - cs.GT
         - eess.SP
         - physics.comp-ph
         - math.NA
@@ -53,6 +57,9 @@ retrieval:
         - scientific machine learning
         - surrogate model
         - neural operator
+        - symbolic regression
+        - operator learning
+        - equation discovery
         - stochastic simulation
         - cme
     - name: math-physics
@@ -75,6 +82,7 @@ retrieval:
         - cs.CL
         - cs.AI
         - cs.IR
+        - cs.IT
       keywords:
         - language model
         - reasoning
@@ -91,38 +99,46 @@ retrieval:
 
 relevance:
   research_context: >
-    Biology x Computer Science research focus; emphasize computational biology,
-    machine learning for biological systems, and transferable ML methods;
-    single-cell and biological dynamics;
-    surrogate modeling; trajectory prediction; SSA/CME; flow matching;
-    stochastic process simulation.
+    Biology x Computer Science research focus.
+    I am especially interested in method papers related to symbolic regression,
+    neural operators, operator learning, scientific machine learning,
+    equation discovery, surrogate modeling, and transferable modeling methods
+    for biological systems, stochastic systems, and dynamical systems.
   keywords:
+    - symbolic regression
+    - neural operator
+    - operator learning
+    - scientific machine learning
+    - equation discovery
+    - surrogate modeling
+    - PDE surrogate
     - biology
+    - system identification
+    - dynamics modeling
     - single-cell
     - omics
     - gene expression
-    - surrogate model
-    - neural operator
     - flow matching
     - trajectory prediction
     - stochastic simulation
     - SSA
     - CME
-    - scientific machine learning
+  # DashScope (Alibaba Bailian) suggested default
+  # You can replace with other embedding models later.
   embedding_model: text-embedding-v4
 
 rerank:
   mode: embedding_plus_qwen3_rerank
   model: qwen3-rerank
-  pool_size: 20
+  pool_size: 50
   instruct: >
-    Given a research profile, rank candidate arXiv papers by practical relevance,
-    transferability, and idea-generation potential.
+    Given a research profile, rank candidate arXiv papers by:
+    1) methodological relevance to symbolic regression, neural operators,
+       operator learning, scientific machine learning, and equation discovery;
+    2) transferability to biology, stochastic systems, and dynamical systems;
+    3) idea-generation potential for future research.
 
 analysis:
+  # DeepSeek (chat) suggested default; can be replaced by OpenAI/Qwen etc.
   model: deepseek-chat
   temperature: 0.2
-
-affiliation:
-  llm_fallback_enabled: true
-  llm_fallback_model: deepseek-chat

@@ -20,6 +20,7 @@ def _as_bool(value: object, default: bool = False) -> bool:
 def load_config(config_path: str | Path) -> Config:
     raw = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
     project = raw["project"]
+    prompts = raw.get("prompts", {})
     retrieval = raw["retrieval"]
     relevance = raw["relevance"]
     rerank = raw.get("rerank", {})
@@ -45,6 +46,7 @@ def load_config(config_path: str | Path) -> Config:
         keep_days=int(project.get("keep_days", 7)),
         timezone=project.get("timezone", "Asia/Shanghai"),
         language=project.get("language", "Chinese"),
+        prompt_dir=prompts.get("dir", "prompts/backend"),
         max_feed_items_per_category=int(retrieval.get("max_feed_items_per_category", 120)),
         domains=domains,
         research_context=relevance["research_context"],

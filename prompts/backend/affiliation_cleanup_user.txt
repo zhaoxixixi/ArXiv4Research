@@ -1,0 +1,5 @@
+Paper title: [[title]]
+Authors: [[authors_csv]]
+Current cleaned affiliations: [[current_affiliations_json]]
+Raw affiliation candidates: [[raw_affiliation_candidates_json]]
+Normalize these into a short affiliation list. JSON only.
