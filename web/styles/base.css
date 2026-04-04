@@ -186,11 +186,94 @@ body, select, input, textarea, button, .panel, .paper-card, .paper-modal-content
   .container { padding: 0 12px; }
 }
 @media (max-width: 640px) {
-  .header-actions { justify-content: flex-start; gap: 6px; }
-  .header-date-text { font-size: 15px; }
-  .header-left-row { gap: 8px; flex-wrap: wrap; align-items: flex-start; }
-  .repo-link-group { align-items: flex-start; }
-  .repo-reference-link { white-space: normal; text-align: left; }
-  .repo-link-card { flex-wrap: wrap; align-items: flex-start; }
-  .repo-link-stats { width: 100%; margin-left: 28px; }
+  .header-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "left actions"
+      "brand brand";
+    justify-items: stretch;
+    align-items: center;
+    gap: 10px 8px;
+    padding-top: 12px;
+    padding-bottom: 10px;
+  }
+  .header-left-stack {
+    grid-area: left;
+    min-width: 0;
+    width: 100%;
+  }
+  .header-actions {
+    grid-area: actions;
+    justify-self: end;
+    justify-content: flex-end;
+    align-self: start;
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+  .brand-lockup {
+    grid-area: brand;
+    justify-self: start;
+    gap: 10px;
+    width: 100%;
+  }
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+  .brand-copy h1 { font-size: 16px; }
+  .sub { display: none; }
+  .project-pill {
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .project-pill-text { font-size: 13px; }
+  .header-left-row {
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: center;
+    min-width: 0;
+  }
+  .repo-link-group {
+    min-width: 0;
+    align-items: flex-start;
+  }
+  .repo-link-card {
+    min-width: 0;
+    width: auto;
+    padding: 8px 10px;
+    gap: 8px;
+    border-radius: 14px;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .repo-link-copy { min-width: 0; }
+  .repo-link-title { font-size: 12px; }
+  .repo-link-subtitle,
+  .repo-link-stats,
+  .repo-reference-link,
+  .header-date-text {
+    display: none;
+  }
+  .date-chip { gap: 0; }
+  .header-icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 420px) {
+  .header-main { gap: 8px 6px; }
+  .header-actions { gap: 3px; }
+  .header-icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .project-pill {
+    gap: 6px;
+    padding: 7px 10px;
+  }
+  .project-pill-text { font-size: 12px; }
+  .repo-link-card { padding: 7px 8px; }
+  .brand-copy h1 { font-size: 15px; }
 }

@@ -41,8 +41,11 @@
 }
 
 @media (max-width: 640px) {
-  .statistics-hero { margin-bottom: 20px; }
-  .statistics-hero h1 { font-size: 34px; }
+  .statistics-page { padding-top: 18px; padding-bottom: 42px; }
+  .statistics-hero { margin-bottom: 14px; text-align: left; }
+  .statistics-hero h1 { font-size: 28px; }
+  .statistics-hero p { display: none; }
+  .statistics-panel { padding: 12px 14px; margin-bottom: 18px; }
   .statistics-summary, .keyword-list { gap: 10px; }
   .keyword-item { width: 100%; justify-content: flex-start; }
   .related-papers { grid-template-columns: 1fr; }
