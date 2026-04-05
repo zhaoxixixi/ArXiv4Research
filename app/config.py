@@ -17,10 +17,20 @@ def _as_bool(value: object, default: bool = False) -> bool:
     return bool(value)
 
 
+def _parse_source_mode(value: object) -> str:
+    mode = str(value or "api_strict_window").strip()
+    if mode != "api_strict_window":
+        raise ValueError(f"Unsupported source.mode: {mode}. Only 'api_strict_window' is supported.")
+    return mode
+
+
 def load_config(config_path: str | Path) -> Config:
     raw = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
     project = raw["project"]
     prompts = raw.get("prompts", {})
+    source = raw.get("source", {})
+    source_api = source.get("api", {})
+    source_fetch_state = source.get("fetch_state", {})
     retrieval = raw["retrieval"]
     relevance = raw["relevance"]
     rerank = raw.get("rerank", {})
@@ -47,6 +57,14 @@ def load_config(config_path: str | Path) -> Config:
         timezone=project.get("timezone", "Asia/Shanghai"),
         language=project.get("language", "Chinese"),
         prompt_dir=prompts.get("dir", "prompts/backend"),
+        source_mode=_parse_source_mode(source.get("mode", "api_strict_window")),
+        api_sort_by=source_api.get("sort_by", "submittedDate"),
+        api_sort_order=source_api.get("sort_order", "descending"),
+        api_max_results_per_category=int(
+            source_api.get("max_results_per_category", retrieval.get("max_feed_items_per_category", 120))
+        ),
+        api_window_lookback_hours_if_no_state=int(source_api.get("window_lookback_hours_if_no_state", 72)),
+        fetch_state_path=source_fetch_state.get("path", "fetch_state.json"),
         max_feed_items_per_category=int(retrieval.get("max_feed_items_per_category", 120)),
         domains=domains,
         research_context=relevance["research_context"],

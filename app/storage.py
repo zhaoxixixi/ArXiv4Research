@@ -34,6 +34,7 @@ def write_daily_snapshot(
     papers: list[Paper],
     generated_at_local: datetime,
     report_timezone: str,
+    snapshot_metadata: dict | None = None,
 ) -> Path:
     base = Path(base_dir)
     daily_dir = base / "daily"
@@ -47,6 +48,8 @@ def write_daily_snapshot(
         "count": len(papers),
         "papers": [_paper_to_dict(p) for p in papers],
     }
+    if snapshot_metadata:
+        payload.update(snapshot_metadata)
     file_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return file_path
 

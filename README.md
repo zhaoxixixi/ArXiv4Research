@@ -12,7 +12,7 @@
 ## Overview
 
 ArXiv4Research is a static daily-report website backed by a Python pipeline.
-It fetches recent arXiv papers, ranks and filters them, generates AI-assisted summaries, and publishes the result as a GitHub Pages site.
+It fetches recent arXiv papers through strict-window arXiv API queries, ranks and filters them, generates AI-assisted summaries, and publishes the result as a GitHub Pages site.
 
 The project is designed around two layers:
 
@@ -23,7 +23,7 @@ This means a public visitor can read the report directly, while deeper personali
 
 ## Features
 
-- **Daily automated digest**: scheduled GitHub Actions jobs fetch, rank, analyze, and publish the latest report.
+- **Daily automated digest**: scheduled GitHub Actions jobs fetch strict-window arXiv API candidates, rank them, analyze them, and publish the latest report.
 - **Domain-balanced paper selection**: retrieval combines relevance ranking with domain-aware coverage.
 - **Bilingual AI analysis**: saved paper insights can include Chinese and English TL;DR, motivation, method, result, and research-help fields.
 - **Idea Spark generation**: each selected paper can carry actionable spark-style research inspiration.
@@ -49,7 +49,7 @@ This means a public visitor can read the report directly, while deeper personali
 
 ## Tech Stack
 
-- **Backend pipeline**: Python 3.12 · feedparser · OpenAI-compatible API calls
+- **Backend pipeline**: Python 3.12 · arXiv API Atom parsing · OpenAI-compatible API calls
 - **Frontend**: Vanilla JavaScript · Pure CSS · no bundler
 - **Deployment**: GitHub Actions → GitHub Pages (`gh-pages`)
 - **Model setup**: DeepSeek-compatible chat models · `text-embedding-v4` · optional `qwen3-rerank`

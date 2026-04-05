@@ -9,6 +9,17 @@ prompts:
   # Editable backend prompt templates.
   dir: prompts/backend
 
+source:
+  # Default production mode now uses strict non-overlapping API windows.
+  mode: api_strict_window
+  api:
+    sort_by: submittedDate
+    sort_order: descending
+    max_results_per_category: 200
+    window_lookback_hours_if_no_state: 72
+  fetch_state:
+    path: fetch_state.json
+
 retrieval:
   max_feed_items_per_category: 120
   domains:

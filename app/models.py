@@ -40,6 +40,12 @@ class Config:
     timezone: str
     language: str
     prompt_dir: str
+    source_mode: str
+    api_sort_by: str
+    api_sort_order: str
+    api_max_results_per_category: int
+    api_window_lookback_hours_if_no_state: int
+    fetch_state_path: str
     max_feed_items_per_category: int
     domains: list[DomainBucket]
     research_context: str

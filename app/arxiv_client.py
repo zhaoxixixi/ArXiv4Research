@@ -1,28 +1,17 @@
 from __future__ import annotations
 
-from datetime import datetime
 from html import unescape as html_unescape
 from html.parser import HTMLParser
 import json
 import logging
 import re
-import time
 from typing import Any, Iterable
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
-from xml.sax.saxutils import unescape
 
-import feedparser
-
+from .arxiv_transport import fetch_arxiv_text
 from .models import DomainBucket, Paper
 
 logger = logging.getLogger(__name__)
 
-ARXIV_USER_AGENT = "ArXiv4Research/0.1 (polite affiliation enricher)"
-ARXIV_POLITE_DELAY_SECONDS = 3.2
-ARXIV_RETRY_BASE_DELAY_SECONDS = 6.0
-ARXIV_REQUEST_TIMEOUT_SECONDS = 20
-ARXIV_MAX_RETRIES = 3
 META_AFFILIATION_NAMES = {
     "citation_author_institution",
     "citation_author_affiliation",
@@ -94,8 +83,6 @@ VOID_TAGS = {
     "track",
     "wbr",
 }
-
-_last_arxiv_request_at = 0.0
 
 
 class _ArxivAffiliationHTMLParser(HTMLParser):
@@ -274,50 +261,6 @@ def _apply_domain_filter(
     return True
 
 
-def _fetch_feed(category: str) -> Any:
-    body, _charset = _fetch_arxiv_response(
-        f"https://rss.arxiv.org/atom/{category}",
-        accept="application/atom+xml,application/xml,text/xml;q=0.9,*/*;q=0.8",
-    )
-    return feedparser.parse(body or b"")
-
-
-def fetch_latest_by_categories(
-    categories: Iterable[str],
-    domain_buckets: list[DomainBucket],
-    global_keywords: list[str],
-    limit_per_cat: int = 120,
-) -> list[Paper]:
-    collected: dict[str, Paper] = {}
-    for category in categories:
-        feed = _fetch_feed(category)
-        for entry in feed.entries[:limit_per_cat]:
-            paper_id = entry.id.split("/")[-1]
-            title = unescape(entry.title).strip().replace("\n", " ")
-            summary = unescape(entry.summary).strip().replace("\n", " ")
-            published_raw = entry.get("published", "")
-            published = published_raw
-            try:
-                published = datetime.strptime(published_raw, "%Y-%m-%dT%H:%M:%SZ").isoformat() + "Z"
-            except ValueError:
-                pass
-
-            paper = Paper(
-                paper_id=paper_id,
-                title=title,
-                summary=summary,
-                authors=_parse_authors(entry),
-                categories=_parse_categories(entry),
-                published=published,
-                link=entry.get("link", f"https://arxiv.org/abs/{paper_id}"),
-            )
-            paper.domain = _pick_domain(paper.categories, domain_buckets)
-            if not _apply_domain_filter(paper, domain_buckets, global_keywords):
-                continue
-            collected[paper_id] = paper
-    return list(collected.values())
-
-
 def enrich_affiliations(papers: Iterable[Paper]) -> None:
     for paper in papers:
         if paper.affiliations:
@@ -347,7 +290,7 @@ def _collect_affiliation_candidates_for_paper(paper: Paper) -> list[str]:
 
 
 def _extract_affiliations_from_page(paper_id: str, url: str) -> list[str]:
-    html = _fetch_arxiv_text(url)
+    html = fetch_arxiv_text(url)
     if not html:
         return []
 
@@ -371,60 +314,6 @@ def _derive_html_url(link: str) -> str:
         return ""
     return link.replace("/abs/", "/html/")
 
-
-def _fetch_arxiv_response(url: str, accept: str = "*/*") -> tuple[bytes, str]:
-    global _last_arxiv_request_at
-
-    for attempt in range(ARXIV_MAX_RETRIES):
-        elapsed = time.monotonic() - _last_arxiv_request_at
-        if elapsed < ARXIV_POLITE_DELAY_SECONDS:
-            time.sleep(ARXIV_POLITE_DELAY_SECONDS - elapsed)
-
-        request = Request(
-            url,
-            headers={
-                "User-Agent": ARXIV_USER_AGENT,
-                "Accept": accept,
-            },
-        )
-
-        try:
-            with urlopen(request, timeout=ARXIV_REQUEST_TIMEOUT_SECONDS) as response:
-                charset = response.headers.get_content_charset() or "utf-8"
-                body = response.read()
-                _last_arxiv_request_at = time.monotonic()
-                return body, charset
-        except HTTPError as exc:
-            _last_arxiv_request_at = time.monotonic()
-            should_retry = exc.code in {403, 408, 429, 500, 502, 503, 504} and attempt < ARXIV_MAX_RETRIES - 1
-            if should_retry:
-                time.sleep(ARXIV_RETRY_BASE_DELAY_SECONDS * (attempt + 1))
-                continue
-            logger.warning("arXiv request failed for %s: HTTP %s", url, exc.code)
-            return b"", "utf-8"
-        except URLError as exc:
-            _last_arxiv_request_at = time.monotonic()
-            if attempt < ARXIV_MAX_RETRIES - 1:
-                time.sleep(ARXIV_RETRY_BASE_DELAY_SECONDS * (attempt + 1))
-                continue
-            logger.warning("arXiv request failed for %s: %s", url, exc)
-            return b"", "utf-8"
-        except Exception as exc:  # pragma: no cover - unexpected network failure path
-            _last_arxiv_request_at = time.monotonic()
-            logger.warning("Unexpected arXiv request failure for %s: %s", url, exc)
-            return b"", "utf-8"
-
-    return b"", "utf-8"
-
-
-def _fetch_arxiv_text(url: str) -> str:
-    body, charset = _fetch_arxiv_response(
-        url,
-        accept="text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    )
-    if not body:
-        return ""
-    return body.decode(charset, errors="replace")
 
 
 def _extract_affiliations_from_jsonld(payload: str) -> list[str]:
