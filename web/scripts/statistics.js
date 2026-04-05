@@ -5,6 +5,7 @@
   const { buildDateScopeLabel, buildRangeScopeFromCount, clampDateToAvailable, getDateDialogScope, getScopeDates, readScopeFromDialog, syncDateDialog, updateDateTrigger } = dateScope;
   const { extractKeywordRanking, getPaperKeywordMeta, normalizeKeywordLabel } = keywords;
   const { applyTheme, getTheme } = theme;
+  const { hydratePresetButtons } = window.ARA.shared.buttons;
   const { derivePdfUrl, enableDialogOutsideClose, escapeHtml, formatAuthors, normalizePaperId, previewText } = utils;
 
   let availableDates = [];
@@ -43,7 +44,8 @@
     }).slice(0, 24);
     document.getElementById("related-title").textContent = `Related Papers · ${keyword}`;
     if (paperDetailController?.isOpen()) paperDetailController.close();
-    document.getElementById("related-papers").innerHTML = currentRelatedPapers.length
+    const relatedPapersNode = document.getElementById("related-papers");
+    relatedPapersNode.innerHTML = currentRelatedPapers.length
       ? currentRelatedPapers
           .map((paper) => `
             <article class="related-paper-card" data-paper-id="${normalizePaperId(paper.id)}" tabindex="0" role="button" aria-label="Open ${escapeHtml(paper.title || "paper details")}">
@@ -51,11 +53,12 @@
               <h3 class="related-paper-title">${escapeHtml(paper.title)}</h3>
               <p class="related-paper-authors">${escapeHtml(formatAuthors(paper.authors || []))}</p>
               <div class="related-paper-snippet">${escapeHtml(previewText(detail.utils.getAiSection(paper.ai || {}, "zh").tldr || paper.summary || "", 170))}</div>
-              <div class="related-paper-actions"><span class="mini-hint">Score ${escapeHtml(String(paper.relevance_score ?? ""))}</span><div class="paper-modal-buttons"><a class="btn ghost resource-btn" href="${escapeHtml(paper.link || "#")}" target="_blank" rel="noreferrer">arXiv</a><a class="btn ghost resource-btn" href="${escapeHtml(derivePdfUrl(paper.link))}" target="_blank" rel="noreferrer">PDF</a></div></div>
+              <div class="related-paper-actions"><span class="mini-hint">Score ${escapeHtml(String(paper.relevance_score ?? ""))}</span><div class="paper-modal-buttons"><a class="btn ghost resource-btn" href="${escapeHtml(paper.link || "#")}" target="_blank" rel="noreferrer" data-resource-icon="arxiv"></a><a class="btn ghost resource-btn" href="${escapeHtml(derivePdfUrl(paper.link))}" target="_blank" rel="noreferrer" data-resource-icon="pdf"></a></div></div>
             </article>
           `)
           .join("")
       : '<div class="stats-empty">No papers match this keyword in the current scope.</div>';
+    hydratePresetButtons(relatedPapersNode);
     document.querySelectorAll(".keyword-item").forEach((button) => button.classList.toggle("active", button.dataset.keyword === keyword));
     bindRelatedPaperEvents();
   };

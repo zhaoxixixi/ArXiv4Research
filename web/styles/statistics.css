@@ -31,7 +31,10 @@
 .related-paper-actions { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--color-border); }
 .related-paper-actions .mini-hint { font-size: 12px; color: var(--color-text-muted); }
 .related-paper-actions .paper-modal-buttons { display: inline-flex; gap: 8px; }
-.related-paper-actions .resource-btn { min-height: 32px; padding: 0 12px; font-size: 12px; }
+.related-paper-actions .icon-resource-btn { width: 34px; height: 34px; padding: 6px; color: var(--color-accent-strong); }
+.related-paper-actions .resource-btn-arxiv { min-width: 58px; }
+.related-paper-actions .resource-icon { width: 18px; height: 18px; }
+.related-paper-actions .resource-icon-arxiv { width: 44px; height: 20px; }
 .related-paper-actions a { text-decoration: none; }
 .stats-empty { padding: 24px; border-radius: 14px; border: 1px dashed var(--color-border-strong); background: linear-gradient(180deg, var(--color-panel-strong) 0%, var(--color-panel) 100%); color: var(--color-text-soft); line-height: 1.7; }
 

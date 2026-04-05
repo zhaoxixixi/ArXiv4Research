@@ -77,12 +77,29 @@
         <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">Close</button><button id="apply-date-selection" type="button" class="btn dialog-primary-btn">Apply</button></menu>
       </form>
     </dialog>
-
     <div id="paper-modal" class="paper-modal" aria-hidden="true">
       <div class="paper-modal-content">
-        <div class="paper-modal-header"><div><div id="paper-modal-meta" class="paper-modal-meta">Paper Details</div><h2 id="paper-modal-title">Paper Details</h2></div><button id="close-paper-modal" class="btn ghost modal-close-btn" aria-label="Close details">Close</button></div>
+        <div class="paper-modal-header">
+          <div>
+            <div id="paper-modal-meta" class="paper-modal-meta">Paper Details</div>
+            <h2 id="paper-modal-title">Paper Details</h2>
+          </div>
+          <button id="close-paper-modal" type="button" class="btn ghost modal-close-btn" data-button-preset="close" aria-label="Close details"></button>
+        </div>
         <div id="paper-modal-body" class="paper-modal-body"></div>
-        <div class="paper-modal-footer"><div class="paper-navigation"><button id="paper-prev" type="button" class="btn ghost">Previous</button><span id="paper-position" class="paper-position">-</span><button id="paper-next" type="button" class="btn ghost">Next</button></div><div class="paper-modal-buttons"><a id="paper-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">arXiv</a><a id="pdf-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">PDF</a><a id="html-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer">HTML</a><a id="code-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" style="display:none;">Code</a></div></div>
+        <div class="paper-modal-footer">
+          <div class="paper-navigation">
+            <button id="paper-prev" type="button" class="btn ghost modal-nav-btn" data-button-preset="prev" aria-label="Previous paper"></button>
+            <span id="paper-position" class="paper-position">-</span>
+            <button id="paper-next" type="button" class="btn ghost modal-nav-btn" data-button-preset="next" aria-label="Next paper"></button>
+          </div>
+          <div class="paper-modal-buttons">
+            <a id="paper-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" data-resource-icon="arxiv"></a>
+            <a id="pdf-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" data-resource-icon="pdf"></a>
+            <a id="html-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" data-resource-icon="html"></a>
+            <a id="code-link" class="btn ghost resource-btn" href="#" target="_blank" rel="noreferrer" data-resource-icon="code" style="display:none;"></a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -107,6 +124,7 @@
     <script src="./scripts/shared/theme.js"></script>
     <script src="./scripts/shared/github-stats.js"></script>
     <script src="./scripts/shared/keywords.js"></script>
+    <script src="./scripts/shared/buttons/presets.js"></script>
     <script src="./scripts/paper-detail/language.js"></script>
     <script src="./scripts/paper-detail/settings.js"></script>
     <script src="./scripts/paper-detail/cache.js"></script>
