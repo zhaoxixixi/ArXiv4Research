@@ -1,0 +1,77 @@
+name: frontend-only-deploy
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: arxiv-research-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build-and-deploy-frontend-only:
+    runs-on: ubuntu-latest
+    env:
+      OUTPUT_DATA_DIR: build/generated-data
+      SITE_OUTPUT_DIR: build/site
+      PUBLISH_BRANCH: gh-pages
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Checkout current gh-pages branch for retained data
+        id: checkout_pages
+        continue-on-error: true
+        uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          path: build/gh-pages
+          fetch-depth: 1
+
+      - name: Restore retained data into incremental workspace
+        run: |
+          rm -rf "$OUTPUT_DATA_DIR"
+          mkdir -p "$OUTPUT_DATA_DIR"
+          if [ -d build/gh-pages/data ]; then
+            cp -R build/gh-pages/data/. "$OUTPUT_DATA_DIR"/
+            echo "Restored existing daily data from gh-pages."
+          else
+            echo "No existing gh-pages data found; starting with empty data directory."
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Build deployable site bundle from existing data only
+        run: python scripts/build_site.py --source-data "$OUTPUT_DATA_DIR" --output-dir "$SITE_OUTPUT_DIR"
+
+      - name: Publish frontend-only rebuild to gh-pages output branch
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          rm -rf /tmp/arxiv4research-pages
+          mkdir -p /tmp/arxiv4research-pages
+          cp -R "$SITE_OUTPUT_DIR"/. /tmp/arxiv4research-pages/
+          cd /tmp/arxiv4research-pages
+          git init
+          git checkout --orphan "$PUBLISH_BRANCH"
+          git config user.name "${{ vars.NAME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.EMAIL || 'github-actions[bot]@users.noreply.github.com' }}"
+          git add --all
+          if git diff --cached --quiet; then
+            echo "No site changes to publish."
+            exit 0
+          fi
+          git commit -m "chore(pages): frontend-only rebuild"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          git push --force origin "$PUBLISH_BRANCH"
