@@ -40,6 +40,34 @@ def _format_submitted_date(dt: datetime) -> str:
     return dt.strftime("%Y%m%d%H%M")
 
 
+def _parse_published_datetime(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+def _paper_is_in_exact_window(paper: Paper, window_start: datetime, window_end: datetime) -> bool:
+    published_at = _parse_published_datetime(paper.published)
+    if published_at is None:
+        return True
+    return window_start <= published_at < window_end
+
+
+def _filter_paper_map_to_exact_window(
+    papers: dict[str, Paper],
+    window_start: datetime,
+    window_end: datetime,
+) -> dict[str, Paper]:
+    return {
+        paper_id: paper
+        for paper_id, paper in papers.items()
+        if _paper_is_in_exact_window(paper, window_start, window_end)
+    }
+
+
 def build_category_search_query(
     category: str,
     submitted_start: datetime | None = None,
@@ -175,7 +203,13 @@ def _fetch_categories_impl(
     submitted_end: datetime | None = None,
     extra_clause: str | None = None,
 ) -> WindowFetchResult:
-    """Fetch arXiv API metadata for multiple categories and summarize unique candidates."""
+    """Fetch arXiv API metadata for multiple categories and summarize unique candidates.
+
+    When a submitted-date window is provided, we still query arXiv with minute-level bounds,
+    but we exact-filter returned papers locally using the half-open interval
+    ``[submitted_start, submitted_end)`` based on the per-entry published timestamp.
+    This avoids duplicate or missed papers around consecutive window boundaries.
+    """
 
     raw_collected: dict[str, Paper] = {}
     filtered_collected: dict[str, Paper] = {}
@@ -215,6 +249,12 @@ def _fetch_categories_impl(
 
             start_index += entry_count
             remaining -= entry_count
+
+    if submitted_start is not None and submitted_end is not None:
+        exact_start = submitted_start.astimezone(timezone.utc)
+        exact_end = submitted_end.astimezone(timezone.utc)
+        raw_collected = _filter_paper_map_to_exact_window(raw_collected, exact_start, exact_end)
+        filtered_collected = _filter_paper_map_to_exact_window(filtered_collected, exact_start, exact_end)
 
     return WindowFetchResult(
         papers=list(filtered_collected.values()),
@@ -264,7 +304,10 @@ def fetch_window_by_categories(
     sort_order: str = DEFAULT_API_SORT_ORDER,
     extra_clause: str | None = None,
 ) -> WindowFetchResult:
-    """Fetch papers for a strict submitted-date window across multiple categories."""
+    """Fetch papers for a strict submitted-date window across multiple categories.
+
+    Window semantics are half-open: papers are kept iff ``window_start <= published < window_end``.
+    """
 
     return _fetch_categories_impl(
         categories=categories,

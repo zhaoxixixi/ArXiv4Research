@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from urllib.error import HTTPError
 from unittest.mock import patch
 
 from app import arxiv_transport
@@ -38,6 +39,31 @@ class ArxivTransportTests(unittest.TestCase):
             html = arxiv_transport.fetch_arxiv_text("https://arxiv.org/html/2604.00001")
 
         self.assertEqual(html, "你好")
+
+    def test_fetch_arxiv_response_raises_on_terminal_http_error(self) -> None:
+        error = HTTPError(
+            url="https://export.arxiv.org/api/query?search_query=cat:cs.LG",
+            code=503,
+            msg="service unavailable",
+            hdrs=None,
+            fp=None,
+        )
+
+        with (
+            patch("app.arxiv_transport.urlopen", side_effect=error),
+            patch("app.arxiv_transport.time.sleep"),
+        ):
+            with self.assertRaises(arxiv_transport.ArxivRequestError):
+                arxiv_transport.fetch_arxiv_response("https://export.arxiv.org/api/query?search_query=cat:cs.LG")
+
+    def test_fetch_arxiv_text_returns_empty_when_optional_html_fetch_fails(self) -> None:
+        with patch(
+            "app.arxiv_transport.fetch_arxiv_response",
+            side_effect=arxiv_transport.ArxivRequestError("https://arxiv.org/html/2604.00001", "HTTP 404"),
+        ):
+            html = arxiv_transport.fetch_arxiv_text("https://arxiv.org/html/2604.00001")
+
+        self.assertEqual(html, "")
 
     def test_shared_rate_limit_inserts_delay_between_consecutive_requests(self) -> None:
         arxiv_transport.reset_transport_state()

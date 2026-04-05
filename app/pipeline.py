@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -8,9 +9,12 @@ from .arxiv_api_client import fetch_window_by_categories
 from .arxiv_client import enrich_affiliations
 from .config import load_config
 from .fetch_state import build_candidate_window, build_success_fetch_state, load_fetch_state, save_fetch_state
+from .models import Paper
 from .rerank import rank_papers, select_top_papers_balanced
 from .sniffer import sniff_code_links
 from .storage import prune_daily_files, write_daily_snapshot, write_index, write_search_index
+
+logger = logging.getLogger(__name__)
 
 
 def _resolve_report_timezone(timezone_name: str) -> ZoneInfo:
@@ -23,6 +27,36 @@ def _resolve_report_timezone(timezone_name: str) -> ZoneInfo:
 def _to_utc_z(dt: datetime) -> str:
     utc_dt = dt.astimezone(timezone.utc)
     return utc_dt.isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def _build_minimal_ai_fallback(paper: Paper) -> dict:
+    fallback_text = (paper.summary or "").strip() or (paper.title or "").strip()
+
+    def _section() -> dict:
+        return {
+            "tldr": fallback_text,
+            "motivation": "",
+            "method": "",
+            "result": "",
+            "help_to_user": "",
+            "idea_spark": {
+                "transferable": False,
+                "idea": "",
+                "risk": "",
+                "inspiration": "",
+            },
+        }
+
+    primary_section = _section()
+    return {
+        **primary_section,
+        "keywords_raw": [],
+        "keywords_normalized": [],
+        "bilingual": {
+            "zh": _section(),
+            "en": _section(),
+        },
+    }
 
 
 def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data") -> None:
@@ -97,17 +131,25 @@ def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data"
         chat_client = build_openai_client()
         for paper in top:
             paper.code = sniff_code_links(paper)
-            paper.ai, analyzed_affiliations = analyze_paper(
-                client=chat_client,
-                paper=paper,
-                model=cfg.analysis_model,
-                language=cfg.language,
-                temperature=cfg.analysis_temperature,
-                prompt_dir=cfg.prompt_dir,
-            )
+            try:
+                paper.ai, analyzed_affiliations = analyze_paper(
+                    client=chat_client,
+                    paper=paper,
+                    model=cfg.analysis_model,
+                    language=cfg.language,
+                    temperature=cfg.analysis_temperature,
+                    prompt_dir=cfg.prompt_dir,
+                )
+            except Exception as exc:  # pragma: no cover - provider/network failures should not stop whole run
+                logger.warning("AI analysis failed for %s: %s", paper.paper_id, exc)
+                paper.ai = _build_minimal_ai_fallback(paper)
+                continue
+
             if analyzed_affiliations:
                 paper.affiliations = analyzed_affiliations
-            else:
+                continue
+
+            try:
                 paper.affiliations = maybe_refine_affiliations_with_llm(
                     client=chat_client,
                     paper=paper,
@@ -115,6 +157,8 @@ def run_pipeline(config_path: str = "config/config.yaml", data_dir: str = "data"
                     enabled=cfg.affiliation_llm_fallback_enabled,
                     prompt_dir=cfg.prompt_dir,
                 )
+            except Exception as exc:  # pragma: no cover - cleanup failures should not stop whole run
+                logger.warning("Affiliation cleanup failed for %s: %s", paper.paper_id, exc)
 
     write_daily_snapshot(
         base_dir=data_dir,

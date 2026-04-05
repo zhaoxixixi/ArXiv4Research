@@ -247,6 +247,132 @@ class ArxivApiClientTests(unittest.TestCase):
         self.assertEqual(result.candidate_count_after_filter, 1)
         self.assertEqual([paper.paper_id for paper in result.papers], ["2604.20001"])
 
+    def test_fetch_window_by_categories_exact_filters_same_minute_boundaries(self) -> None:
+        boundary_feed = _build_feed(
+            """
+  <entry>
+    <id>http://arxiv.org/abs/2604.21001</id>
+    <updated>2026-04-04T05:30:10Z</updated>
+    <published>2026-04-04T05:30:10Z</published>
+    <title>Neural operator early paper</title>
+    <summary>Operator learning for science.</summary>
+    <author><name>Author Early</name></author>
+    <category term="cs.LG" />
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2604.21002</id>
+    <updated>2026-04-04T05:30:50Z</updated>
+    <published>2026-04-04T05:30:50Z</published>
+    <title>Neural operator late paper</title>
+    <summary>Operator learning for science.</summary>
+    <author><name>Author Late</name></author>
+    <category term="cs.LG" />
+  </entry>
+"""
+        )
+
+        def fake_fetch(
+            search_query: str,
+            start: int = 0,
+            max_results: int = 100,
+            sort_by: str = "submittedDate",
+            sort_order: str = "descending",
+        ) -> feedparser.FeedParserDict:
+            self.assertIn("submittedDate:[202604040530 TO 202604040531]", search_query)
+            if start == 0:
+                return boundary_feed
+            return _build_feed("")
+
+        with patch("app.arxiv_api_client._fetch_api_feed", side_effect=fake_fetch):
+            result = fetch_window_by_categories(
+                categories=["cs.LG"],
+                domain_buckets=self.domains,
+                global_keywords=self.global_keywords,
+                window_start=datetime(2026, 4, 4, 5, 30, 30, tzinfo=timezone.utc),
+                window_end=datetime(2026, 4, 4, 5, 31, 0, tzinfo=timezone.utc),
+                limit_per_cat=10,
+                page_size=10,
+            )
+
+        self.assertEqual(result.candidate_count_before_filter, 1)
+        self.assertEqual(result.candidate_count_after_filter, 1)
+        self.assertEqual([paper.paper_id for paper in result.papers], ["2604.21002"])
+
+    def test_consecutive_windows_do_not_duplicate_or_miss_boundary_papers(self) -> None:
+        first_feed = _build_feed(
+            """
+  <entry>
+    <id>http://arxiv.org/abs/2604.22001</id>
+    <updated>2026-04-04T05:30:00Z</updated>
+    <published>2026-04-04T05:30:00Z</published>
+    <title>Neural operator boundary paper</title>
+    <summary>Operator learning for science.</summary>
+    <author><name>Author Boundary</name></author>
+    <category term="cs.LG" />
+  </entry>
+"""
+        )
+        second_feed = _build_feed(
+            """
+  <entry>
+    <id>http://arxiv.org/abs/2604.22001</id>
+    <updated>2026-04-04T05:30:00Z</updated>
+    <published>2026-04-04T05:30:00Z</published>
+    <title>Neural operator boundary paper</title>
+    <summary>Operator learning for science.</summary>
+    <author><name>Author Boundary</name></author>
+    <category term="cs.LG" />
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2604.22002</id>
+    <updated>2026-04-04T05:30:40Z</updated>
+    <published>2026-04-04T05:30:40Z</published>
+    <title>Neural operator next paper</title>
+    <summary>Operator learning for science.</summary>
+    <author><name>Author Next</name></author>
+    <category term="cs.LG" />
+  </entry>
+"""
+        )
+
+        def fake_fetch(
+            search_query: str,
+            start: int = 0,
+            max_results: int = 100,
+            sort_by: str = "submittedDate",
+            sort_order: str = "descending",
+        ) -> feedparser.FeedParserDict:
+            if start > 0:
+                return _build_feed("")
+            if "submittedDate:[202604040529 TO 202604040530]" in search_query:
+                return first_feed
+            if "submittedDate:[202604040530 TO 202604040531]" in search_query:
+                return second_feed
+            return _build_feed("")
+
+        with patch("app.arxiv_api_client._fetch_api_feed", side_effect=fake_fetch):
+            first_result = fetch_window_by_categories(
+                categories=["cs.LG"],
+                domain_buckets=self.domains,
+                global_keywords=self.global_keywords,
+                window_start=datetime(2026, 4, 4, 5, 29, 0, tzinfo=timezone.utc),
+                window_end=datetime(2026, 4, 4, 5, 30, 0, tzinfo=timezone.utc),
+                limit_per_cat=10,
+                page_size=10,
+            )
+            second_result = fetch_window_by_categories(
+                categories=["cs.LG"],
+                domain_buckets=self.domains,
+                global_keywords=self.global_keywords,
+                window_start=datetime(2026, 4, 4, 5, 30, 0, tzinfo=timezone.utc),
+                window_end=datetime(2026, 4, 4, 5, 31, 0, tzinfo=timezone.utc),
+                limit_per_cat=10,
+                page_size=10,
+            )
+
+        self.assertEqual([paper.paper_id for paper in first_result.papers], [])
+        self.assertEqual([paper.paper_id for paper in second_result.papers], ["2604.22001", "2604.22002"])
+
 
 if __name__ == "__main__":
     unittest.main()

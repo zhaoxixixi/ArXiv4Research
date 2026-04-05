@@ -16,6 +16,14 @@ ARXIV_MAX_RETRIES = 3
 _last_arxiv_request_at = 0.0
 
 
+class ArxivRequestError(RuntimeError):
+    """Raised when a polite arXiv request ultimately fails after retries."""
+
+    def __init__(self, url: str, message: str) -> None:
+        super().__init__(message)
+        self.url = url
+
+
 def reset_transport_state() -> None:
     """Reset the in-process arXiv rate-limit clock, mainly for tests."""
 
@@ -54,29 +62,32 @@ def fetch_arxiv_response(url: str, accept: str = "*/*") -> tuple[bytes, str]:
                 time.sleep(ARXIV_RETRY_BASE_DELAY_SECONDS * (attempt + 1))
                 continue
             logger.warning("arXiv request failed for %s: HTTP %s", url, exc.code)
-            return b"", "utf-8"
+            raise ArxivRequestError(url, f"HTTP {exc.code}") from exc
         except URLError as exc:
             _last_arxiv_request_at = time.monotonic()
             if attempt < ARXIV_MAX_RETRIES - 1:
                 time.sleep(ARXIV_RETRY_BASE_DELAY_SECONDS * (attempt + 1))
                 continue
             logger.warning("arXiv request failed for %s: %s", url, exc)
-            return b"", "utf-8"
+            raise ArxivRequestError(url, str(exc)) from exc
         except Exception as exc:  # pragma: no cover - unexpected network failure path
             _last_arxiv_request_at = time.monotonic()
             logger.warning("Unexpected arXiv request failure for %s: %s", url, exc)
-            return b"", "utf-8"
+            raise ArxivRequestError(url, str(exc)) from exc
 
-    return b"", "utf-8"
+    raise ArxivRequestError(url, "Request failed after retries")
 
 
 def fetch_arxiv_text(url: str) -> str:
     """Fetch text/HTML content from arXiv using the shared polite transport."""
 
-    body, charset = fetch_arxiv_response(
-        url,
-        accept="text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    )
+    try:
+        body, charset = fetch_arxiv_response(
+            url,
+            accept="text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        )
+    except ArxivRequestError:
+        return ""
     if not body:
         return ""
     return body.decode(charset, errors="replace")

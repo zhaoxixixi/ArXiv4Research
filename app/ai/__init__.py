@@ -1,20 +1,9 @@
-from __future__ import annotations
-
-"""Backward-compatible facade for AI-related helpers.
-
-Internal implementation now lives under ``app.ai`` so that client creation,
-normalization, and analysis logic remain separated without changing external
-imports.
-"""
-
-from .ai import (
-    analyze_paper,
+from .analysis import analyze_paper, followup_answer, maybe_refine_affiliations_with_llm
+from .clients import (
     build_embedding_client,
     build_openai_client,
-    followup_answer,
     get_embeddings,
     get_rerank_credentials,
-    maybe_refine_affiliations_with_llm,
     rerank_documents,
 )
 

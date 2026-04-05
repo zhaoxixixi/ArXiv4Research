@@ -164,6 +164,183 @@ class PipelineApiStrictWindowTests(unittest.TestCase):
         mocked_embedding_client.assert_not_called()
         mocked_chat_client.assert_not_called()
 
+    def test_fetch_failure_does_not_write_snapshot_or_advance_fetch_state(self) -> None:
+        previous_state = build_success_fetch_state(
+            window=CandidateWindow(
+                start=datetime(2026, 4, 2, 0, 0, tzinfo=timezone.utc),
+                end=datetime(2026, 4, 3, 0, 0, tzinfo=timezone.utc),
+            ),
+            report_date_local="2026-04-03",
+            updated_at_utc=datetime(2026, 4, 3, 0, 1, tzinfo=timezone.utc),
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_fetch_state(tmpdir, previous_state)
+            original_state = Path(tmpdir, "fetch_state.json").read_text(encoding="utf-8")
+
+            with (
+                patch("app.pipeline.load_config", return_value=_config()),
+                patch("app.pipeline.datetime", _FixedDateTime),
+                patch("app.pipeline.fetch_window_by_categories", side_effect=RuntimeError("fetch failed")),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "fetch failed"):
+                    run_pipeline(config_path="ignored.yaml", data_dir=tmpdir)
+
+            self.assertFalse(Path(tmpdir, "daily", "2026-04-04.json").exists())
+            self.assertEqual(Path(tmpdir, "fetch_state.json").read_text(encoding="utf-8"), original_state)
+
+    def test_single_paper_analysis_failure_falls_back_and_pipeline_continues(self) -> None:
+        first_paper = _paper()
+        second_paper = Paper(
+            paper_id="2604.30002",
+            title="Symbolic regression for biology",
+            summary="A second transferable modeling method.",
+            authors=["Author Two"],
+            categories=["cs.LG"],
+            published="2026-04-04T05:10:00Z",
+            link="https://arxiv.org/abs/2604.30002",
+            domain="ai4science",
+        )
+
+        def fake_analyze_paper(**kwargs: object) -> tuple[dict, list[str]]:
+            paper = kwargs["paper"]
+            assert isinstance(paper, Paper)
+            if paper.paper_id == "2604.30001":
+                raise RuntimeError("LLM temporarily unavailable")
+            return (
+                {
+                    "tldr": "English summary",
+                    "motivation": "",
+                    "method": "",
+                    "result": "",
+                    "help_to_user": "",
+                    "idea_spark": {"transferable": False, "idea": "", "risk": "", "inspiration": ""},
+                    "keywords_raw": [],
+                    "keywords_normalized": [],
+                    "bilingual": {
+                        "zh": {
+                            "tldr": "中文摘要",
+                            "motivation": "",
+                            "method": "",
+                            "result": "",
+                            "help_to_user": "",
+                            "idea_spark": {"transferable": False, "idea": "", "risk": "", "inspiration": ""},
+                        },
+                        "en": {
+                            "tldr": "English summary",
+                            "motivation": "",
+                            "method": "",
+                            "result": "",
+                            "help_to_user": "",
+                            "idea_spark": {"transferable": False, "idea": "", "risk": "", "inspiration": ""},
+                        },
+                    },
+                },
+                ["Institute B"],
+            )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with (
+                patch("app.pipeline.load_config", return_value=_config()),
+                patch("app.pipeline.datetime", _FixedDateTime),
+                patch(
+                    "app.pipeline.fetch_window_by_categories",
+                    return_value=WindowFetchResult(
+                        papers=[first_paper, second_paper],
+                        candidate_count_before_filter=8,
+                        candidate_count_after_filter=2,
+                    ),
+                ),
+                patch("app.pipeline.build_embedding_client", return_value=object()),
+                patch("app.pipeline.build_openai_client", return_value=object()),
+                patch("app.pipeline.rank_papers", side_effect=lambda **kwargs: kwargs["papers"]),
+                patch("app.pipeline.select_top_papers_balanced", side_effect=lambda **kwargs: kwargs["ranked_papers"]),
+                patch("app.pipeline.enrich_affiliations"),
+                patch("app.pipeline.sniff_code_links", return_value={"has_code": False}),
+                patch("app.pipeline.analyze_paper", side_effect=fake_analyze_paper),
+                patch("app.pipeline.maybe_refine_affiliations_with_llm", return_value=[]),
+            ):
+                run_pipeline(config_path="ignored.yaml", data_dir=tmpdir)
+
+            daily_payload = json.loads(Path(tmpdir, "daily", "2026-04-04.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(daily_payload["count"], 2)
+        first_saved, second_saved = daily_payload["papers"]
+        self.assertEqual(first_saved["id"], "2604.30001")
+        self.assertEqual(first_saved["ai"]["tldr"], "A transferable modeling method.")
+        self.assertEqual(second_saved["id"], "2604.30002")
+        self.assertEqual(second_saved["ai"]["bilingual"]["zh"]["tldr"], "中文摘要")
+        self.assertEqual(second_saved["affiliations"], ["Institute B"])
+
+    def test_affiliation_cleanup_failure_keeps_analysis_result(self) -> None:
+        paper = _paper()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with (
+                patch("app.pipeline.load_config", return_value=_config()),
+                patch("app.pipeline.datetime", _FixedDateTime),
+                patch(
+                    "app.pipeline.fetch_window_by_categories",
+                    return_value=WindowFetchResult(
+                        papers=[paper],
+                        candidate_count_before_filter=5,
+                        candidate_count_after_filter=1,
+                    ),
+                ),
+                patch("app.pipeline.build_embedding_client", return_value=object()),
+                patch("app.pipeline.build_openai_client", return_value=object()),
+                patch("app.pipeline.rank_papers", side_effect=lambda **kwargs: kwargs["papers"]),
+                patch("app.pipeline.select_top_papers_balanced", side_effect=lambda **kwargs: kwargs["ranked_papers"]),
+                patch("app.pipeline.enrich_affiliations"),
+                patch("app.pipeline.sniff_code_links", return_value={"has_code": False}),
+                patch(
+                    "app.pipeline.analyze_paper",
+                    return_value=(
+                        {
+                            "tldr": "Primary summary",
+                            "motivation": "",
+                            "method": "",
+                            "result": "",
+                            "help_to_user": "",
+                            "idea_spark": {"transferable": False, "idea": "", "risk": "", "inspiration": ""},
+                            "keywords_raw": [],
+                            "keywords_normalized": [],
+                            "bilingual": {
+                                "zh": {
+                                    "tldr": "中文摘要",
+                                    "motivation": "",
+                                    "method": "",
+                                    "result": "",
+                                    "help_to_user": "",
+                                    "idea_spark": {"transferable": False, "idea": "", "risk": "", "inspiration": ""},
+                                },
+                                "en": {
+                                    "tldr": "English summary",
+                                    "motivation": "",
+                                    "method": "",
+                                    "result": "",
+                                    "help_to_user": "",
+                                    "idea_spark": {"transferable": False, "idea": "", "risk": "", "inspiration": ""},
+                                },
+                            },
+                        },
+                        [],
+                    ),
+                ),
+                patch(
+                    "app.pipeline.maybe_refine_affiliations_with_llm",
+                    side_effect=RuntimeError("cleanup failed"),
+                ),
+            ):
+                run_pipeline(config_path="ignored.yaml", data_dir=tmpdir)
+
+            daily_payload = json.loads(Path(tmpdir, "daily", "2026-04-04.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(daily_payload["count"], 1)
+        saved_paper = daily_payload["papers"][0]
+        self.assertEqual(saved_paper["ai"]["tldr"], "Primary summary")
+        self.assertEqual(saved_paper["affiliations"], [])
+
 
 if __name__ == "__main__":
     unittest.main()
