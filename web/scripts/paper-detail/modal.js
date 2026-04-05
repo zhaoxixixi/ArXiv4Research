@@ -159,6 +159,7 @@
     const bindSettingsDialog = () => {
       if (!settingsDialog) return;
       enableDialogOutsideClose(settingsDialog);
+      paperDetail.settings.bindSettingsDialogUi(settingsDialog);
       settingsDialog.querySelector("#save-settings")?.addEventListener("click", (event) => {
         event.preventDefault();
         paperDetail.settings.saveSettingsFromDialog(settingsDialog);
@@ -166,7 +167,7 @@
         settingsDialog.close();
       });
       settingsDialog.querySelector("#clear-settings")?.addEventListener("click", () => {
-        if (!window.confirm("Clear the API, model, and research context saved in this browser?")) return;
+        if (!window.confirm("Clear all locally saved API settings and research context from this browser?")) return;
         paperDetail.settings.clearLocalSettings();
         paperDetail.settings.loadSettingsIntoDialog(settingsDialog);
         onStateChange();

@@ -53,6 +53,41 @@
       ? { mode: "range", start: currentDateRange.start, end: currentDateRange.end }
       : { mode: "single", date: clampDateToAvailable(availableDates, currentDate || defaultSingleDate) };
 
+  /** Compare two scopes while respecting single/range semantics. */
+  const isSameScope = (left = {}, right = {}) => {
+    if (!left || !right || left.mode !== right.mode) return false;
+    return left.mode === "range" ? left.start === right.start && left.end === right.end : left.date === right.date;
+  };
+
+  /** Update quick-preset active state to reflect the current dialog selection. */
+  const refreshDateDialogPreview = (availableDates = []) => {
+    const scope = readScopeFromDialog(availableDates);
+
+    document.querySelectorAll(".date-quick-btn").forEach((button) => {
+      const presetScope = buildRangeScopeFromCount(availableDates, button.dataset.range || "latest");
+      const active = isSameScope(scope, presetScope || {});
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  };
+
+  /** Bind live preview updates for the shared date dialog. */
+  const bindDateDialogLivePreview = ({ dialogId = "date-dialog", getAvailableDates = null, availableDates = [] } = {}) => {
+    const dialog = document.getElementById(dialogId);
+    if (!dialog || dialog.dataset.livePreviewBound === "true") return;
+    dialog.dataset.livePreviewBound = "true";
+    const resolveAvailableDates = () => (typeof getAvailableDates === "function" ? getAvailableDates() : availableDates);
+    const refresh = () => refreshDateDialogPreview(resolveAvailableDates());
+
+    dialog.addEventListener("change", (event) => {
+      if (event.target?.matches("#single-date-input, #range-start-input, #range-end-input")) refresh();
+    });
+
+    dialog.addEventListener("input", (event) => {
+      if (event.target?.matches("#single-date-input, #range-start-input, #range-end-input")) refresh();
+    });
+  };
+
   /** Sync dialog inputs and quick labels from a scope. */
   const syncDateDialog = ({ availableDates = [], scope = { mode: "single", date: "" }, singleFallbackDate = "", rangeFallbackStart = "" } = {}) => {
     const mode = scope.mode || "single";
@@ -77,7 +112,12 @@
     if (singleInput) singleInput.value = clampDateToAvailable(availableDates, scope.date || singleFallbackDate || maxDate);
     if (rangeStart) rangeStart.value = clampDateToAvailable(availableDates, scope.start || rangeFallbackStart || minDate || maxDate);
     if (rangeEnd) rangeEnd.value = clampDateToAvailable(availableDates, scope.end || maxDate);
-    if (availability) availability.textContent = availableDates.length ? `${availableDates.length} days available · ${minDate} → ${maxDate}` : "No daily reports available";
+    if (availability) {
+      availability.textContent = availableDates.length
+        ? `${availableDates.length} saved days · ${formatCompactDate(minDate)} – ${formatCompactDate(maxDate)}`
+        : "No daily reports available";
+    }
+    refreshDateDialogPreview(availableDates);
   };
 
   /** Read the currently selected scope from dialog inputs. */
@@ -101,6 +141,8 @@
     getScopeDates,
     buildRangeScopeFromCount,
     getDateDialogScope,
+    bindDateDialogLivePreview,
+    refreshDateDialogPreview,
     syncDateDialog,
     readScopeFromDialog,
   };

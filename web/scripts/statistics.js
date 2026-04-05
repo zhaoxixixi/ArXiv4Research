@@ -2,7 +2,7 @@
   const { data, dateScope, keywords, theme, utils } = window.ARA.shared;
   const detail = window.ARA.paperDetail;
   const { aggregateDailyPayloads, fetchDataJson, resolveDataBasePath } = data;
-  const { buildDateScopeLabel, buildRangeScopeFromCount, clampDateToAvailable, getDateDialogScope, getScopeDates, readScopeFromDialog, syncDateDialog, updateDateTrigger } = dateScope;
+  const { bindDateDialogLivePreview, buildDateScopeLabel, buildRangeScopeFromCount, clampDateToAvailable, getDateDialogScope, getScopeDates, readScopeFromDialog, syncDateDialog, updateDateTrigger } = dateScope;
   const { extractKeywordRanking, getPaperKeywordMeta, normalizeKeywordLabel } = keywords;
   const { applyTheme, getTheme } = theme;
   const { hydratePresetButtons } = window.ARA.shared.buttons;
@@ -105,6 +105,7 @@
     if (!initial) return void (document.getElementById("statistics-summary").innerHTML = '<div class="stats-empty">No data yet. Run the pipeline first.</div>');
     await loadScope({ mode: "single", date: initial });
     syncDateSelectionDialog({ mode: "single", date: initial });
+    bindDateDialogLivePreview({ getAvailableDates: () => availableDates });
     document.getElementById("open-date-picker").addEventListener("click", () => {
       const dialog = document.getElementById("date-dialog");
       syncDateSelectionDialog();

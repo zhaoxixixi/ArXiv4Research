@@ -3,7 +3,7 @@
   const detail = window.ARA.paperDetail;
   const { DEFAULT_DOMAIN_ORDER, DOMAIN_META, DEFAULT_THEME, THEMES } = constants;
   const { aggregateDailyPayloads, fetchDataJson, resolveDataBasePath } = data;
-  const { buildDateScopeLabel, buildRangeScopeFromCount, clampDateToAvailable, getDateDialogScope, getScopeDates, readScopeFromDialog, syncDateDialog, updateDateTrigger } = dateScope;
+  const { bindDateDialogLivePreview, buildDateScopeLabel, buildRangeScopeFromCount, clampDateToAvailable, getDateDialogScope, getScopeDates, readScopeFromDialog, syncDateDialog, updateDateTrigger } = dateScope;
   const { applyTheme, getTheme, updateThemeSelectionUI } = theme;
   const { escapeHtml, formatAffiliations, formatAuthors, formatPublished, normalizePaperId, previewText, enableDialogOutsideClose } = utils;
 
@@ -136,6 +136,7 @@
     [document.getElementById("theme-dialog"), document.getElementById("date-dialog")].forEach(enableDialogOutsideClose);
     renderStatus();
     syncDateSelectionDialog();
+    bindDateDialogLivePreview({ getAvailableDates: () => availableDates });
     document.getElementById("domain-filter").addEventListener("change", applyDomainFilter);
     document.getElementById("open-date-picker").addEventListener("click", () => {
       const dialog = document.getElementById("date-dialog");

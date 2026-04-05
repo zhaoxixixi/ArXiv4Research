@@ -37,3 +37,5 @@ coverage/
 
 # Optional local docs scratchpad
 docs/drafts/
+.agents/
+skills-lock.json

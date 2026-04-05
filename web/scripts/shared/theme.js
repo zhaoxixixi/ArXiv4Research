@@ -25,6 +25,7 @@
       const active = option.dataset.theme === activeTheme;
       option.classList.toggle("active", active);
       option.setAttribute("aria-pressed", active ? "true" : "false");
+      option.setAttribute("aria-current", active ? "true" : "false");
     });
   };
 

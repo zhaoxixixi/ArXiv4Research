@@ -32,6 +32,33 @@
     return Boolean(settings.baseUrl && settings.apiKey && settings.model);
   };
 
+  const resetApiKeyVisibility = (dialog) => {
+    if (!dialog) return;
+    const input = dialog.querySelector("#api-key");
+    const toggle = dialog.querySelector("#toggle-api-key");
+    if (!input || !toggle) return;
+    input.type = "password";
+    toggle.textContent = "Show";
+    toggle.setAttribute("aria-label", "Show API key");
+    toggle.setAttribute("aria-pressed", "false");
+  };
+
+  const bindSettingsDialogUi = (dialog) => {
+    if (!dialog || dialog.dataset.settingsUiBound === "true") return;
+    dialog.dataset.settingsUiBound = "true";
+    const input = dialog.querySelector("#api-key");
+    const toggle = dialog.querySelector("#toggle-api-key");
+    if (input && toggle) {
+      toggle.addEventListener("click", () => {
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        toggle.textContent = showing ? "Show" : "Hide";
+        toggle.setAttribute("aria-label", showing ? "Show API key" : "Hide API key");
+        toggle.setAttribute("aria-pressed", showing ? "false" : "true");
+      });
+    }
+  };
+
   const loadSettingsIntoDialog = (dialog) => {
     if (!dialog) return;
     const settings = getLocalSettings();
@@ -46,6 +73,7 @@
       const field = dialog.querySelector(selector);
       if (field) field.value = value;
     });
+    resetApiKeyVisibility(dialog);
   };
 
   const saveSettingsFromDialog = (dialog) => {
@@ -65,7 +93,9 @@
     getStorageMode,
     getLocalSettings,
     hasLocalAiConfig,
+    bindSettingsDialogUi,
     loadSettingsIntoDialog,
+    resetApiKeyVisibility,
     saveSettingsFromDialog,
     clearLocalSettings,
   };

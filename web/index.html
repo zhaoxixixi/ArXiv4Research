@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ArXiv4Research is a biology-first arXiv reading workspace with bilingual AI summaries, paper details, and daily research signals." />
+    <meta name="theme-color" content="#f4f7fb" />
     <link rel="icon" type="image/png" href="./assets/logo.png" />
     <title>ArXiv Research Assistant</title>
     <link rel="stylesheet" href="./styles/base.css" />
@@ -11,15 +13,12 @@
     <link rel="stylesheet" href="./styles/app.css" />
   </head>
   <body data-theme="lavender">
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="page-shell">
       <header class="site-header">
         <div class="header-main container">
           <div class="header-left-stack">
             <div class="header-left-row">
-              <a class="project-pill" href="#" aria-label="ArXiv4Research">
-                <span class="project-pill-dot"></span>
-                <span class="project-pill-text">ArXiv4Research</span>
-              </a>
               <div class="repo-link-group">
                 <a
                   class="repo-link-card"
@@ -56,13 +55,13 @@
               </div>
             </div>
           </div>
-          <div class="brand-lockup">
+          <a class="brand-lockup" href="./index.html" aria-label="Go to home page">
             <div class="brand-mark"><img class="brand-mark-logo" src="./assets/logo.png" alt="ArXiv4Research logo" /></div>
             <div class="brand-copy">
               <h1 id="title">ArXiv Research Assistant</h1>
               <p class="sub">Biology-first daily digest with bilingual AI insights and idea sparks</p>
             </div>
-          </div>
+          </a>
 
           <div class="header-actions">
             <div class="date-chip">
@@ -116,7 +115,7 @@
         </div>
       </header>
 
-      <main class="container app">
+      <main id="main-content" class="container app">
         <section id="local-status" class="local-status panel"></section>
         <section id="papers" class="papers"></section>
       </main>
@@ -149,41 +148,136 @@
 
     <dialog id="settings-dialog" class="dialog">
       <form method="dialog" class="panel dialog-panel settings-panel">
-        <div class="dialog-header-block"><div class="dialog-kicker">Local Settings</div><h3>Local Settings</h3><p class="dialog-lead">Used only for browser-local Spark and follow-up.</p></div>
-        <div class="dialog-form-grid">
-          <label class="field-group field-span-2"><span>Base URL (OpenAI-compatible)</span><input id="api-base-url" placeholder="https://api.deepseek.com/v1" /></label>
-          <label class="field-group field-span-2"><span>API Key</span><input id="api-key" type="password" placeholder="sk-..." /></label>
-          <label class="field-group"><span>Model</span><input id="api-model" placeholder="deepseek-chat" /></label>
-          <label class="field-group"><span>Storage</span><select id="storage-mode"><option value="local">This device (localStorage)</option><option value="session">This session (sessionStorage)</option></select></label>
-          <label class="field-group field-span-2"><span>Research context</span><textarea id="research-context" placeholder="Describe your current research focus for local Spark and follow-up."></textarea></label>
+        <div class="dialog-header-block">
+          <div class="dialog-header-top">
+            <div class="dialog-header-copy">
+              <div class="dialog-kicker">Local Settings</div>
+              <h3>Local Workspace</h3>
+            </div>
+            <button type="submit" value="cancel" class="btn ghost dialog-close-btn" data-button-preset="close" aria-label="Close panel" title="Close panel"></button>
+          </div>
+          <p class="dialog-lead">Saved only in this browser for Spark and follow-up. Nothing here is written back to the public site.</p>
         </div>
-        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">Close</button><button id="save-settings" value="default" class="btn dialog-primary-btn">Save</button><button id="clear-settings" type="button" class="btn ghost danger dialog-danger-btn">Clear</button></menu>
+        <div class="settings-sections">
+          <section class="dialog-card settings-section-card">
+            <div class="settings-section-head">
+              <div class="settings-section-kicker">Connection</div>
+              <h4>Model Endpoint</h4>
+              <p class="field-hint">Use your own OpenAI-compatible endpoint for local enhancement features.</p>
+            </div>
+            <div class="dialog-form-grid settings-form-grid">
+              <label class="field-group field-span-2">
+                <span>Base URL</span>
+                <input id="api-base-url" placeholder="https://api.deepseek.com/v1" inputmode="url" autocomplete="off" />
+                <small class="field-hint">Example: DeepSeek / OpenAI-compatible base URL.</small>
+              </label>
+              <label class="field-group field-span-2">
+                <span>API Key</span>
+                <div class="input-with-action">
+                  <input id="api-key" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false" />
+                  <button id="toggle-api-key" type="button" class="inline-action-btn" aria-label="Show API key" aria-pressed="false">Show</button>
+                </div>
+                <small class="field-hint">Stored only in this browser storage mode.</small>
+              </label>
+              <label class="field-group field-span-2">
+                <span>Model</span>
+                <input id="api-model" placeholder="deepseek-chat" autocomplete="off" spellcheck="false" />
+                <small class="field-hint">Used for local Spark and follow-up answers.</small>
+              </label>
+            </div>
+          </section>
+          <section class="dialog-card settings-section-card">
+            <div class="settings-section-head">
+              <div class="settings-section-kicker">Storage</div>
+              <h4>Browser Persistence</h4>
+              <p class="field-hint">Choose whether these local settings stay on this device or only for the current session.</p>
+            </div>
+            <div class="dialog-form-grid settings-form-grid">
+              <label class="field-group field-span-2">
+                <span>Storage Mode</span>
+                <select id="storage-mode"><option value="local">This device (localStorage)</option><option value="session">This session (sessionStorage)</option></select>
+                <small class="field-hint">This never syncs to GitHub, your repo, or the public page.</small>
+              </label>
+            </div>
+          </section>
+          <section class="dialog-card settings-section-card">
+            <div class="settings-section-head">
+              <div class="settings-section-kicker">Research Focus</div>
+              <h4>Personal Context</h4>
+              <p class="field-hint">Used to personalize Spark generation and follow-up answers in this browser.</p>
+            </div>
+            <div class="dialog-form-grid settings-form-grid">
+              <label class="field-group field-span-2">
+                <span>Research Context</span>
+                <textarea id="research-context" placeholder="Describe your current research focus for local Spark and follow-up."></textarea>
+                <small class="field-hint">Example: topics, methods, datasets, or questions you care about most.</small>
+              </label>
+            </div>
+          </section>
+        </div>
+        <menu class="dialog-actions">
+          <div class="dialog-actions-left">
+            <button id="clear-settings" type="button" class="btn ghost danger dialog-danger-btn">Clear Local Data</button>
+          </div>
+          <div class="dialog-actions-right">
+            <button id="save-settings" value="default" class="btn dialog-primary-btn">Save</button>
+          </div>
+        </menu>
       </form>
     </dialog>
 
     <dialog id="theme-dialog" class="dialog">
       <form method="dialog" class="panel dialog-panel theme-dialog-panel">
-        <div class="dialog-header-block"><div class="dialog-kicker">Theme</div><h3>Theme</h3><p class="dialog-lead">Choose a reading preset.</p></div>
-        <section class="dialog-card"><div class="theme-grid">
-          <button type="button" class="theme-option" data-theme="lavender"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#fafbff"></span><span class="theme-swatch" style="--swatch:#eef2ff"></span><span class="theme-swatch" style="--swatch:#667eea"></span></span><span class="theme-copy"><strong>Sky Blue</strong><small>Light, bright, and easy to scan.</small></span></button>
-          <button type="button" class="theme-option" data-theme="pearl"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#ffffff"></span><span class="theme-swatch" style="--swatch:#f3f6ff"></span><span class="theme-swatch" style="--swatch:#7c3aed"></span></span><span class="theme-copy"><strong>Soft Violet</strong><small>Clean light mode with a violet accent.</small></span></button>
-          <button type="button" class="theme-option" data-theme="sage"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#edf3ee"></span><span class="theme-swatch" style="--swatch:#f8fcf8"></span><span class="theme-swatch" style="--swatch:#5b8a72"></span></span><span class="theme-copy"><strong>Sage</strong><small>Quiet green-gray tones for long reading.</small></span></button>
-          <button type="button" class="theme-option" data-theme="graphite"><span class="theme-preview"><span class="theme-swatch" style="--swatch:#090c11"></span><span class="theme-swatch" style="--swatch:#121822"></span><span class="theme-swatch" style="--swatch:#7dd3fc"></span></span><span class="theme-copy"><strong>Graphite Night</strong><small>Low-stimulation dark mode.</small></span></button>
+        <div class="dialog-header-block">
+          <div class="dialog-header-top">
+            <div class="dialog-header-copy">
+              <div class="dialog-kicker">Theme</div>
+              <h3>Reading Theme</h3>
+            </div>
+            <button type="submit" value="cancel" class="btn ghost dialog-close-btn" data-button-preset="close" aria-label="Close panel" title="Close panel"></button>
+          </div>
+          <p class="dialog-lead">Tap a preset to apply it instantly, then close the panel whenever you're done.</p>
+        </div>
+        <section class="dialog-card theme-dialog-card"><div class="theme-grid">
+          <button type="button" class="theme-option" data-theme="lavender" aria-label="Apply Sky Blue theme"><span class="theme-option-head"><span class="theme-copy"><strong>Sky Blue</strong><small>Bright · airy</small></span><span class="theme-active-badge" aria-hidden="true">Current</span></span><span class="theme-preview"><span class="theme-swatch" style="--swatch:#fafbff"></span><span class="theme-swatch" style="--swatch:#eef2ff"></span><span class="theme-swatch" style="--swatch:#667eea"></span></span></button>
+          <button type="button" class="theme-option" data-theme="pearl" aria-label="Apply Soft Violet theme"><span class="theme-option-head"><span class="theme-copy"><strong>Soft Violet</strong><small>Clean · violet</small></span><span class="theme-active-badge" aria-hidden="true">Current</span></span><span class="theme-preview"><span class="theme-swatch" style="--swatch:#ffffff"></span><span class="theme-swatch" style="--swatch:#f3f6ff"></span><span class="theme-swatch" style="--swatch:#7c3aed"></span></span></button>
+          <button type="button" class="theme-option" data-theme="sage" aria-label="Apply Sage theme"><span class="theme-option-head"><span class="theme-copy"><strong>Sage</strong><small>Calm · muted</small></span><span class="theme-active-badge" aria-hidden="true">Current</span></span><span class="theme-preview"><span class="theme-swatch" style="--swatch:#edf3ee"></span><span class="theme-swatch" style="--swatch:#f8fcf8"></span><span class="theme-swatch" style="--swatch:#5b8a72"></span></span></button>
+          <button type="button" class="theme-option" data-theme="graphite" aria-label="Apply Graphite Night theme"><span class="theme-option-head"><span class="theme-copy"><strong>Graphite Night</strong><small>Quiet · dark</small></span><span class="theme-active-badge" aria-hidden="true">Current</span></span><span class="theme-preview"><span class="theme-swatch" style="--swatch:#090c11"></span><span class="theme-swatch" style="--swatch:#121822"></span><span class="theme-swatch" style="--swatch:#7dd3fc"></span></span></button>
         </div></section>
-        <menu class="dialog-actions dialog-actions-split"><button id="reset-theme" type="button" class="btn ghost dialog-secondary-btn">Reset</button><div class="dialog-actions-right"><button value="cancel" class="btn dialog-primary-btn">Done</button></div></menu>
+        <menu class="dialog-actions">
+          <div class="dialog-actions-left">
+            <button id="reset-theme" type="button" class="btn ghost dialog-tertiary-btn">Reset</button>
+          </div>
+        </menu>
       </form>
     </dialog>
 
     <dialog id="date-dialog" class="dialog">
       <form method="dialog" class="panel dialog-panel date-dialog-panel">
-        <div class="dialog-header-block"><div class="dialog-kicker">Daily Scope</div><h3>Date Range</h3><p class="dialog-lead">Browse one day or a multi-day range.</p></div>
+        <div class="dialog-header-block">
+          <div class="dialog-header-top">
+            <div class="dialog-header-copy">
+              <div class="dialog-kicker">Date</div>
+              <h3>Daily Scope</h3>
+            </div>
+            <button type="submit" value="cancel" class="btn ghost dialog-close-btn" data-button-preset="close" aria-label="Close panel" title="Close panel"></button>
+          </div>
+          <p class="dialog-lead">Pick one saved report day or expand into a multi-day reading window.</p>
+        </div>
         <section class="dialog-card">
-          <div class="date-mode-section"><div class="date-mode-toggle" role="group" aria-label="Scope mode"><button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">Single</button><button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">Range</button></div></div>
-          <section id="single-date-group" class="date-input-group"><label for="single-date-input">Date</label><input id="single-date-input" type="date" /></section>
-          <section id="range-date-group" class="date-range-grid hidden"><div class="date-input-group"><label for="range-start-input">Start</label><input id="range-start-input" type="date" /></div><div class="date-input-group"><label for="range-end-input">End</label><input id="range-end-input" type="date" /></div></section>
+          <div class="date-mode-section"><div class="section-head section-head-tight"><strong>Browse Mode</strong><span class="mini-hint">Step 1</span></div><div class="date-mode-toggle" role="group" aria-label="Scope mode"><button id="date-mode-single" type="button" class="mode-toggle-btn active" data-mode="single">Single Day</button><button id="date-mode-range" type="button" class="mode-toggle-btn" data-mode="range">Date Range</button></div></div>
         </section>
-        <section class="dialog-card date-quick-card"><div class="section-head"><strong>Quick Range</strong><span id="date-dialog-availability" class="mini-hint"></span></div><div class="date-quick-actions"><button type="button" class="template-btn date-quick-btn" data-range="latest">Latest</button><button type="button" class="template-btn date-quick-btn" data-range="3">Last 3 Days</button><button type="button" class="template-btn date-quick-btn" data-range="7">Last 7 Days</button><button type="button" class="template-btn date-quick-btn" data-range="all">All</button></div></section>
-        <menu class="dialog-actions"><button value="cancel" class="btn ghost dialog-secondary-btn">Close</button><button id="apply-date-selection" type="button" class="btn dialog-primary-btn">Apply</button></menu>
+        <section class="dialog-card date-input-card">
+          <div class="section-head section-head-tight"><strong>Pick Day or Range</strong><span class="mini-hint">Step 2</span></div>
+          <section id="single-date-group" class="date-input-group"><label for="single-date-input">Report Day</label><input id="single-date-input" type="date" /></section>
+          <section id="range-date-group" class="date-range-grid hidden"><div class="date-input-group"><label for="range-start-input">Start Day</label><input id="range-start-input" type="date" /></div><div class="date-input-group"><label for="range-end-input">End Day</label><input id="range-end-input" type="date" /></div></section>
+        </section>
+        <section class="dialog-card date-quick-card"><div class="section-head section-head-tight"><strong>Quick Presets</strong><span id="date-dialog-availability" class="mini-hint"></span></div><div class="date-quick-actions"><button type="button" class="template-btn date-quick-btn" data-range="latest">Latest</button><button type="button" class="template-btn date-quick-btn" data-range="3">Last 3 Days</button><button type="button" class="template-btn date-quick-btn" data-range="7">Last 7 Days</button><button type="button" class="template-btn date-quick-btn" data-range="all">All Days</button></div><p class="date-quick-note mini-hint">Fast presets based on the saved report archive.</p></section>
+        <menu class="dialog-actions">
+          <div class="dialog-actions-right">
+            <button id="apply-date-selection" type="button" class="btn dialog-primary-btn">Apply</button>
+          </div>
+        </menu>
       </form>
     </dialog>
 
