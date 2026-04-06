@@ -56,6 +56,22 @@ class ArxivTransportTests(unittest.TestCase):
             with self.assertRaises(arxiv_transport.ArxivRequestError):
                 arxiv_transport.fetch_arxiv_response("https://export.arxiv.org/api/query?search_query=cat:cs.LG")
 
+    def test_fetch_arxiv_response_retries_timeout_error(self) -> None:
+        responses = [TimeoutError("The read operation timed out"), _DummyResponse(b"retry-ok")]
+
+        with (
+            patch("app.arxiv_transport.urlopen", side_effect=responses),
+            patch("app.arxiv_transport.time.monotonic", side_effect=[100.0, 100.0, 104.0, 104.0]),
+            patch("app.arxiv_transport.time.sleep") as mocked_sleep,
+        ):
+            body, charset = arxiv_transport.fetch_arxiv_response(
+                "https://export.arxiv.org/api/query?search_query=cat:math.PR"
+            )
+
+        self.assertEqual(body, b"retry-ok")
+        self.assertEqual(charset, "utf-8")
+        mocked_sleep.assert_called_once_with(arxiv_transport.ARXIV_RETRY_BASE_DELAY_SECONDS)
+
     def test_fetch_arxiv_text_returns_empty_when_optional_html_fetch_fails(self) -> None:
         with patch(
             "app.arxiv_transport.fetch_arxiv_response",

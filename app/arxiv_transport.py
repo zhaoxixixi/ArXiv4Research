@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import socket
 import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 ARXIV_USER_AGENT = "ArXiv4Research/0.1 (polite client)"
 ARXIV_POLITE_DELAY_SECONDS = 3.2
 ARXIV_RETRY_BASE_DELAY_SECONDS = 6.0
-ARXIV_REQUEST_TIMEOUT_SECONDS = 20
+ARXIV_REQUEST_TIMEOUT_SECONDS = 60
 ARXIV_MAX_RETRIES = 3
 
 _last_arxiv_request_at = 0.0
@@ -69,6 +70,13 @@ def fetch_arxiv_response(url: str, accept: str = "*/*") -> tuple[bytes, str]:
                 time.sleep(ARXIV_RETRY_BASE_DELAY_SECONDS * (attempt + 1))
                 continue
             logger.warning("arXiv request failed for %s: %s", url, exc)
+            raise ArxivRequestError(url, str(exc)) from exc
+        except (TimeoutError, socket.timeout) as exc:
+            _last_arxiv_request_at = time.monotonic()
+            if attempt < ARXIV_MAX_RETRIES - 1:
+                time.sleep(ARXIV_RETRY_BASE_DELAY_SECONDS * (attempt + 1))
+                continue
+            logger.warning("arXiv request timed out for %s: %s", url, exc)
             raise ArxivRequestError(url, str(exc)) from exc
         except Exception as exc:  # pragma: no cover - unexpected network failure path
             _last_arxiv_request_at = time.monotonic()
