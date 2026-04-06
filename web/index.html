@@ -100,22 +100,24 @@
           </div>
         </div>
 
-        <div class="header-filters">
-          <div class="filter-board container">
-            <div class="filter-row">
-              <span class="filter-label">DOMAIN</span>
-              <div id="domain-filter-chips" class="filter-chip-scroll"></div>
-              <select id="domain-filter" class="visually-hidden"><option value="all">All</option></select>
-            </div>
-            <div class="filter-row filter-meta-row">
-              <span class="filter-label">STATUS</span>
-              <div id="meta" class="meta-inline"></div>
-            </div>
-          </div>
-        </div>
       </header>
 
       <main id="main-content" class="container app">
+        <section class="workspace-toolbar panel" aria-label="Report controls">
+          <div class="workspace-toolbar-row workspace-toolbar-head-row">
+            <div class="workspace-toolbar-head">
+              <span class="workspace-toolbar-kicker">Report controls</span>
+            </div>
+            <div id="meta" class="meta-inline workspace-toolbar-meta"></div>
+          </div>
+          <div class="workspace-toolbar-row workspace-toolbar-domain-row">
+            <span class="workspace-toolbar-label">Domain</span>
+            <div class="workspace-toolbar-chip-viewport">
+              <div id="domain-filter-chips" class="filter-chip-scroll workspace-toolbar-chips"></div>
+            </div>
+            <select id="domain-filter" class="visually-hidden"><option value="all">All</option></select>
+          </div>
+        </section>
         <section id="local-status" class="local-status panel"></section>
         <section id="papers" class="papers"></section>
       </main>
