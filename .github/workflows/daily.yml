@@ -2,8 +2,8 @@ name: arxiv-research-daily
 
 on:
   schedule:
-    # Every day at 06:00 in Asia/Shanghai.
-    - cron: "0 6 * * *"
+    # Every day at 22:00 in Asia/Shanghai.
+    - cron: "0 22 * * *"
       timezone: "Asia/Shanghai"
   workflow_dispatch:
 

@@ -1,6 +1,6 @@
 project:
   title: ArXiv Research Assistant
-  top_k: 150
+  top_k: 200
   keep_days: 30
   timezone: Asia/Shanghai
   language: Chinese
@@ -10,18 +10,19 @@ prompts:
   dir: prompts/backend
 
 source:
-  # Default production mode now uses strict non-overlapping API windows.
-  mode: api_strict_window
-  api:
-    sort_by: submittedDate
-    sort_order: descending
-    max_results_per_category: 200
-    window_lookback_hours_if_no_state: 72
+  # Default production mode follows arXiv official category announcement lists.
+  mode: announcement_list
+  announcement:
+    lookback_days_if_no_state: 3
+  # api:
+  #   sort_by: submittedDate
+  #   sort_order: descending
+  #   max_results_per_category: 200
+  #   window_lookback_hours_if_no_state: 72
   fetch_state:
     path: fetch_state.json
-
 retrieval:
-  max_feed_items_per_category: 120
+  max_feed_items_per_category: 200
   domains:
     - name: biology
       priority: 100
@@ -98,7 +99,7 @@ retrieval:
         - language model
         - reasoning
     - name: cv
-      priority: 40
+      priority: 50
       filter_mode: soft
       categories:
         - cs.CV
@@ -107,14 +108,71 @@ retrieval:
       keywords:
         - diffusion
         - vision transformer
+    # You can add more domains and categories as needed.
+    - name: multicore-realtime-scheduling
+      priority: 50
+      filter_mode: hard
+      categories:
+        - cs.OS  # Operating Systems
+        - cs.DC  # Distributed, Parallel, and Cluster Computing
+        - cs.AR  # Hardware Architecture
+        - cs.PF  # Performance
+        - eess.SY  # Systems and Control
+      keywords:
+        - multi-core scheduling
+        - multicore
+        - real-time systems
+        - schedulability analysis
+        - mixed-criticality
+        - openEuler
+        - RTOS
+        - task scheduling
+        - resource allocation
+      cross_keywords:
+        - linux kernel
+        - eBPF
+        - cache partitioning
+        - lock-free
+        - machine learning
+        - reinforcement learning
+        - energy-efficient
+    - name: system-and-cyber-security
+      priority: 50
+      filter_mode: hard
+      categories:
+        - cs.CR  # Cryptography and Security
+        - cs.NI  # Networking and Internet Architecture
+        - cs.OS  # Operating Systems (Crucial for host security)
+        - cs.SE  # Software Engineering (For vulnerability analysis)
+      keywords:
+        - host security
+        - system security
+        - intrusion detection
+        - vulnerability detection
+        - malware analysis
+        - access control
+        - endpoint protection
+        - kernel security
+        - memory safety
+      cross_keywords:
+        - fuzzing
+        - static analysis
+        - anomaly detection
+        - large language models
+        - deep learning
+        - zero trust
+        - cloud-native
 
 relevance:
   research_context: >
-    Biology x Computer Science research focus.
+    Biology x Computer Science research focus, with ai4science as the primary direction.
     I am especially interested in method papers related to symbolic regression,
     neural operators, operator learning, scientific machine learning,
     equation discovery, surrogate modeling, and transferable modeling methods
     for biological systems, stochastic systems, and dynamical systems.
+    As a secondary and much smaller interest, I also want to occasionally surface
+    a few papers on multicore real-time scheduling and system/cyber security,
+    especially when they involve strong systems methodology or practical analysis.
   keywords:
     - symbolic regression
     - neural operator
@@ -134,6 +192,11 @@ relevance:
     - stochastic simulation
     - SSA
     - CME
+    - real-time systems
+    - schedulability analysis
+    - system security
+    - vulnerability detection
+    - memory safety
   # DashScope (Alibaba Bailian) suggested default
   # You can replace with other embedding models later.
   embedding_model: text-embedding-v4
@@ -153,3 +216,7 @@ analysis:
   # DeepSeek (chat) suggested default; can be replaced by OpenAI/Qwen etc.
   model: deepseek-chat
   temperature: 0.2
+
+affiliation:
+  # 0 disables arXiv /abs and /html affiliation page fetching entirely.
+  web_fetch_top_per_domain: 0

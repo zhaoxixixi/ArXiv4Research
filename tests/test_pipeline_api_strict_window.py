@@ -10,7 +10,7 @@ from unittest.mock import patch
 from app.arxiv_api_client import WindowFetchResult
 from app.fetch_state import CandidateWindow, build_success_fetch_state, save_fetch_state
 from app.models import Config, DomainBucket, Paper
-from app.pipeline import run_pipeline
+from app.pipeline import _select_affiliation_enrichment_targets, run_pipeline
 
 
 class _FixedDateTime(datetime):
@@ -35,7 +35,10 @@ def _paper() -> Paper:
     )
 
 
-def _config(source_mode: str = "api_strict_window") -> Config:
+def _config(
+    source_mode: str = "api_strict_window",
+    affiliation_web_fetch_top_per_domain: int = 5,
+) -> Config:
     domains = [
         DomainBucket(
             name="ai4science",
@@ -54,6 +57,7 @@ def _config(source_mode: str = "api_strict_window") -> Config:
         language="Chinese",
         prompt_dir="prompts/backend",
         source_mode=source_mode,
+        announcement_lookback_days_if_no_state=7,
         api_sort_by="submittedDate",
         api_sort_order="descending",
         api_max_results_per_category=200,
@@ -70,12 +74,48 @@ def _config(source_mode: str = "api_strict_window") -> Config:
         rerank_instruct="rank well",
         analysis_model="deepseek-chat",
         analysis_temperature=0.2,
+        affiliation_web_fetch_top_per_domain=affiliation_web_fetch_top_per_domain,
         affiliation_llm_fallback_enabled=True,
         affiliation_llm_fallback_model="deepseek-chat",
     )
 
 
 class PipelineApiStrictWindowTests(unittest.TestCase):
+    def test_affiliation_enrichment_targets_are_capped_to_top_five_per_domain(self) -> None:
+        papers = [
+            Paper(
+                paper_id=f"bio-{index}",
+                title=f"Biology {index}",
+                summary="summary",
+                authors=["Author"],
+                categories=["q-bio.GN"],
+                published="2026-04-04T05:00:00Z",
+                link=f"https://arxiv.org/abs/bio-{index}",
+                domain="biology",
+                relevance_score=100 - index,
+            )
+            for index in range(6)
+        ] + [
+            Paper(
+                paper_id=f"ai-{index}",
+                title=f"AI {index}",
+                summary="summary",
+                authors=["Author"],
+                categories=["cs.LG"],
+                published="2026-04-04T05:00:00Z",
+                link=f"https://arxiv.org/abs/ai-{index}",
+                domain="ai4science",
+                relevance_score=90 - index,
+            )
+            for index in range(3)
+        ]
+
+        selected = _select_affiliation_enrichment_targets(papers, max_per_domain=5)
+
+        self.assertEqual([paper.paper_id for paper in selected[:5]], ["bio-0", "bio-1", "bio-2", "bio-3", "bio-4"])
+        self.assertEqual([paper.paper_id for paper in selected[5:]], ["ai-0", "ai-1", "ai-2"])
+        self.assertNotIn("bio-5", [paper.paper_id for paper in selected])
+
     def test_pipeline_api_mode_writes_window_metadata_and_fetch_state(self) -> None:
         paper = _paper()
 
@@ -95,7 +135,7 @@ class PipelineApiStrictWindowTests(unittest.TestCase):
                 patch("app.pipeline.build_openai_client", return_value=object()),
                 patch("app.pipeline.rank_papers", side_effect=lambda **kwargs: kwargs["papers"]),
                 patch("app.pipeline.select_top_papers_balanced", side_effect=lambda **kwargs: kwargs["ranked_papers"]),
-                patch("app.pipeline.enrich_affiliations"),
+                patch("app.pipeline.enrich_affiliations") as mocked_enrich_affiliations,
                 patch("app.pipeline.sniff_code_links", return_value={"url": "https://github.com/example/repo"}),
                 patch(
                     "app.pipeline.analyze_paper",
@@ -122,6 +162,40 @@ class PipelineApiStrictWindowTests(unittest.TestCase):
         self.assertEqual(state_payload["last_successful_cutoff"], "2026-04-04T06:00:00Z")
         self.assertEqual(state_payload["candidate_count_before_filter"], 6)
         self.assertEqual(state_payload["candidate_count_after_filter"], 2)
+        self.assertEqual(mocked_enrich_affiliations.call_args.args[0], [paper])
+
+    def test_pipeline_skips_affiliation_fetch_when_config_disables_it(self) -> None:
+        paper = _paper()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with (
+                patch(
+                    "app.pipeline.load_config",
+                    return_value=_config(affiliation_web_fetch_top_per_domain=0),
+                ),
+                patch("app.pipeline.datetime", _FixedDateTime),
+                patch(
+                    "app.pipeline.fetch_window_by_categories",
+                    return_value=WindowFetchResult(
+                        papers=[paper],
+                        candidate_count_before_filter=1,
+                        candidate_count_after_filter=1,
+                    ),
+                ),
+                patch("app.pipeline.build_embedding_client", return_value=object()),
+                patch("app.pipeline.build_openai_client", return_value=object()),
+                patch("app.pipeline.rank_papers", side_effect=lambda **kwargs: kwargs["papers"]),
+                patch("app.pipeline.select_top_papers_balanced", side_effect=lambda **kwargs: kwargs["ranked_papers"]),
+                patch("app.pipeline.enrich_affiliations") as mocked_enrich_affiliations,
+                patch("app.pipeline.sniff_code_links", return_value={"url": "https://github.com/example/repo"}),
+                patch(
+                    "app.pipeline.analyze_paper",
+                    return_value=({"zh": {"tldr": "中文"}, "en": {"tldr": "English"}}, []),
+                ),
+            ):
+                run_pipeline(config_path="ignored.yaml", data_dir=tmpdir)
+
+        mocked_enrich_affiliations.assert_not_called()
 
     def test_empty_window_still_writes_daily_snapshot_and_advances_boundary(self) -> None:
         previous_state = build_success_fetch_state(

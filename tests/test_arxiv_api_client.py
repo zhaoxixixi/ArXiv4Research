@@ -10,9 +10,11 @@ import feedparser
 from app.arxiv_api_client import (
     ARXIV_API_ENDPOINT,
     build_category_search_query,
+    build_id_list_query_url,
     build_query_url,
     fetch_latest_by_categories,
     fetch_window_by_categories,
+    normalize_arxiv_id,
     parse_api_feed,
 )
 from app.models import DomainBucket
@@ -121,6 +123,43 @@ class ArxivApiClientTests(unittest.TestCase):
         self.assertEqual(papers[0].domain, "biology")
         self.assertEqual(papers[0].published, "2026-04-04T01:00:00Z")
         self.assertEqual(papers[1].domain, "ai4science")
+
+    def test_parse_api_feed_normalizes_versioned_ids(self) -> None:
+        payload = """<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <id>http://arxiv.org/abs/2604.04702v1</id>
+    <updated>2026-04-07T02:00:00Z</updated>
+    <published>2026-04-07T01:00:00Z</published>
+    <title>Neural operator update</title>
+    <summary>Operator learning for science.</summary>
+    <author><name>Alice Example</name></author>
+    <category term="cs.LG" />
+  </entry>
+</feed>
+"""
+
+        papers = parse_api_feed(
+            payload=payload.encode("utf-8"),
+            domain_buckets=self.domains,
+            global_keywords=self.global_keywords,
+            apply_filters=False,
+        )
+
+        self.assertEqual([paper.paper_id for paper in papers], ["2604.04702"])
+        self.assertEqual(papers[0].link, "http://arxiv.org/abs/2604.04702v1")
+
+    def test_normalize_arxiv_id_handles_modern_and_legacy_forms(self) -> None:
+        self.assertEqual(normalize_arxiv_id("2604.04702v3"), "2604.04702")
+        self.assertEqual(normalize_arxiv_id("http://arxiv.org/abs/2604.04702v1"), "2604.04702")
+        self.assertEqual(normalize_arxiv_id("arXiv:2604.04702v2"), "2604.04702")
+        self.assertEqual(normalize_arxiv_id("http://arxiv.org/abs/math/0301234v2"), "math/0301234")
+
+    def test_build_id_list_query_url_uses_canonical_non_versioned_ids(self) -> None:
+        url = build_id_list_query_url(["2604.04702v1", "http://arxiv.org/abs/2604.04703v2"])
+        params = parse_qs(urlparse(url).query)
+
+        self.assertEqual(params["id_list"][0], "2604.04702,2604.04703")
 
     def test_fetch_latest_by_categories_paginates_and_dedupes(self) -> None:
         first_page = _build_feed(

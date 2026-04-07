@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from dataclasses import dataclass
 from html import unescape as html_unescape
+import re
 from typing import Iterable
 from urllib.parse import urlencode
 
@@ -28,6 +29,21 @@ class WindowFetchResult:
     papers: list[Paper]
     candidate_count_before_filter: int
     candidate_count_after_filter: int
+
+
+def normalize_arxiv_id(value: str) -> str:
+    """Normalize an arXiv id to a canonical non-versioned form."""
+
+    normalized = str(value or "").strip()
+    if not normalized:
+        return ""
+
+    if normalized.lower().startswith("arxiv:"):
+        normalized = normalized.split(":", 1)[1]
+    elif "/abs/" in normalized:
+        normalized = normalized.split("/abs/", 1)[1]
+
+    return normalized.rsplit("v", 1)[0] if re.search(r"v\d+$", normalized) else normalized
 
 
 def _format_submitted_date(dt: datetime) -> str:
@@ -122,7 +138,7 @@ def _normalize_published(value: str) -> str:
 
 
 def _entry_to_paper(entry: dict, domain_buckets: list[DomainBucket]) -> Paper:
-    paper_id = entry.id.split("/")[-1]
+    paper_id = normalize_arxiv_id(entry.get("id", ""))
     title = html_unescape(entry.title).strip().replace("\n", " ")
     summary = html_unescape(entry.summary).strip().replace("\n", " ")
     categories = _parse_categories(entry)
@@ -321,3 +337,51 @@ def fetch_window_by_categories(
         submitted_end=window_end,
         extra_clause=extra_clause,
     )
+
+
+def build_id_list_query_url(paper_ids: Iterable[str], max_results: int | None = None) -> str:
+    """Build an arXiv API query URL for an explicit list of paper ids."""
+
+    unique_ids = [normalize_arxiv_id(paper_id) for paper_id in paper_ids if normalize_arxiv_id(paper_id)]
+    params = {"id_list": ",".join(unique_ids)}
+    if max_results is not None:
+        params["max_results"] = max(1, int(max_results))
+    return f"{ARXIV_API_ENDPOINT}?{urlencode(params)}"
+
+
+
+def fetch_papers_by_ids(
+    paper_ids: Iterable[str],
+    domain_buckets: list[DomainBucket],
+    global_keywords: list[str],
+    batch_size: int = 50,
+    apply_filters: bool = False,
+) -> list[Paper]:
+    """Fetch explicit paper ids from the arXiv API in small batches."""
+
+    unique_ids: list[str] = []
+    seen: set[str] = set()
+    for paper_id in paper_ids:
+        normalized = normalize_arxiv_id(paper_id)
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        unique_ids.append(normalized)
+
+    if not unique_ids:
+        return []
+
+    papers_by_id: dict[str, Paper] = {}
+    safe_batch_size = max(1, int(batch_size))
+    for start in range(0, len(unique_ids), safe_batch_size):
+        batch = unique_ids[start : start + safe_batch_size]
+        url = build_id_list_query_url(batch, max_results=len(batch))
+        body, _charset = fetch_arxiv_response(
+            url,
+            accept="application/atom+xml,application/xml,text/xml;q=0.9,*/*;q=0.8",
+        )
+        feed = feedparser.parse(body or b"")
+        for paper in parse_api_entries(feed.entries, domain_buckets, global_keywords, apply_filters=apply_filters):
+            papers_by_id[paper.paper_id] = paper
+
+    return [papers_by_id[paper_id] for paper_id in unique_ids if paper_id in papers_by_id]

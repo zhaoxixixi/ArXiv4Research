@@ -12,7 +12,7 @@
 ## Overview
 
 ArXiv4Research is a static daily-report website backed by a Python pipeline.
-It fetches recent arXiv papers through strict-window arXiv API queries, ranks and filters them, generates AI-assisted summaries, and publishes the result as a GitHub Pages site.
+The current production pipeline follows arXiv's official category announcement lists (`/list/<category>/recent`) to discover newly announced papers, then fetches canonical metadata from the arXiv API by paper id, ranks and filters them, generates AI-assisted summaries, and publishes the result as a GitHub Pages site.
 
 The project is designed around two layers:
 
@@ -21,16 +21,60 @@ The project is designed around two layers:
 
 This means a public visitor can read the report directly, while deeper personalized analysis stays local and private.
 
+### Current production semantics
+
+- **Default source mode**: `announcement_list`
+- **Discovery source**: arXiv official category `/recent` pages
+- **Metadata source**: arXiv API `id_list` queries
+- **Incremental state semantics**: progress is tracked by processed **announcement date**, not by API submitted timestamp
+- **GitHub Actions schedule**: every day at **22:00 Asia/Shanghai**
+
+The older `api_strict_window` mode is still available as a compatibility / fallback mode, but it is no longer the default production path.
+
 ## Features
 
-- **Daily automated digest**: scheduled GitHub Actions jobs fetch strict-window arXiv API candidates, rank them, analyze them, and publish the latest report.
+- **Daily automated digest**: scheduled GitHub Actions jobs follow arXiv official announcement pages, resolve announced paper ids through the arXiv API, rank them, analyze them, and publish the latest report.
 - **Domain-balanced paper selection**: retrieval combines relevance ranking with domain-aware coverage.
 - **Bilingual AI analysis**: saved paper insights can include Chinese and English TL;DR, motivation, method, result, and research-help fields.
 - **Idea Spark generation**: each selected paper can carry actionable spark-style research inspiration.
 - **Keyword statistics page**: inspect hot topics across one day or a date range and open related papers directly.
-- **In-page paper detail modal**: browse summaries, affiliations, resources, and an embedded PDF reader without leaving the page.
+- **In-page paper detail modal**: browse summaries, affiliations (when available), resources, and an embedded PDF reader without leaving the page.
 - **Theme presets**: several long-reading-friendly visual themes are available and stored locally in the browser.
 - **Local enhancement tools**: users can generate personalized Spark and follow-up answers with their own API key stored only in browser storage.
+
+## Data source modes
+
+ArXiv4Research currently supports two fetch modes:
+
+### 1. `announcement_list` — default production mode
+
+This mode is designed for the semantics of “papers that arXiv officially announced on recent update pages”.
+
+Flow:
+
+1. Read `/list/<category>/recent`
+2. Parse available announcement dates and `skip` anchors
+3. Collect paper ids for newly seen announcement dates
+4. Fetch full metadata from the arXiv API by `id_list`
+5. Run ranking, selection, analysis, and site generation
+
+Why this is the default:
+
+- matches arXiv's official public announcement rhythm more closely
+- avoids many boundary issues caused by API `submittedDate` windows
+- works naturally with “no announcement today → no update today” semantics
+
+### 2. `api_strict_window` — compatibility / fallback mode
+
+This mode queries the arXiv API directly with a strict submitted-date window and performs exact half-open interval filtering locally.
+
+It is still useful for:
+
+- debugging
+- compatibility with older state semantics
+- comparing announcement-based behavior with pure API-window behavior
+
+However, it is **not** the default production mode anymore.
 
 ## Architecture
 
@@ -39,17 +83,20 @@ This means a public visitor can read the report directly, while deeper personali
 │  Python Pipeline    │────▶│  JSON    │────▶│  Static Frontend     │
 │  (app/)             │     │  (data/) │     │  (web/)              │
 │                     │     │          │     │                      │
-│  arXiv fetch        │     │  daily/  │     │  index.html          │
-│  → domain classify  │     │  index   │     │  statistics.html     │
-│  → embedding rank   │     │  search  │     │  paper detail modal  │
-│  → rerank (optional)│     │          │     │  local AI enhance    │
+│  /recent discover   │     │  daily/  │     │  index.html          │
+│  → id_list API fetch│     │  index   │     │  statistics.html     │
+│  → domain classify  │     │  search  │     │  paper detail modal  │
+│  → embedding rank   │     │          │     │  local AI enhance    │
+│  → rerank (optional)│     │          │     │                      │
 │  → AI analysis      │     │          │     │                      │
 └─────────────────────┘     └──────────┘     └──────────────────────┘
 ```
 
+> Note: the pipeline can still run in `api_strict_window` mode, but the architecture above reflects the current default production path.
+
 ## Tech Stack
 
-- **Backend pipeline**: Python 3.12 · arXiv API Atom parsing · OpenAI-compatible API calls
+- **Backend pipeline**: Python 3.12 · arXiv announcement-list parsing · arXiv API Atom parsing · OpenAI-compatible API calls
 - **Frontend**: Vanilla JavaScript · Pure CSS · no bundler
 - **Deployment**: GitHub Actions → GitHub Pages (`gh-pages`)
 - **Model setup**: DeepSeek-compatible chat models · `text-embedding-v4` · optional `qwen3-rerank`
@@ -110,6 +157,9 @@ Then run:
 python scripts/run_pipeline.py
 ```
 
+By default, this uses `config/config.yaml`, which currently points to `source.mode: announcement_list`.
+If you need to switch modes, edit the YAML config rather than patching the code.
+
 ## Local website preview
 
 Preview the source-style static site:
@@ -146,6 +196,10 @@ Typical secrets:
 For GitHub-hosted scheduled runs, **Secrets are the correct place** to configure credentials.
 In other words, your concern is correct: normal deployment users should think in terms of **GitHub Secrets**, not local `export` commands.
 
+Current scheduled publishing runs at:
+
+- **22:00 Asia/Shanghai** every day
+
 ## Project Structure
 
 ```text
@@ -175,6 +229,8 @@ web/
 - `main` stores source code
 - `gh-pages` stores generated static output and retained report data
 - GitHub Actions rebuilds and republishes the site on schedule
+- the default production pipeline uses `announcement_list`
+- `api_strict_window` remains available as a non-default compatibility mode
 - browser-side personalized settings remain local to the visitor
 
 ## Development Notes

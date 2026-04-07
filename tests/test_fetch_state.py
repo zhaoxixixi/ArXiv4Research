@@ -8,6 +8,7 @@ from pathlib import Path
 
 from app.fetch_state import (
     CandidateWindow,
+    build_announcement_fetch_state,
     build_candidate_window,
     build_success_fetch_state,
     load_fetch_state,
@@ -63,6 +64,46 @@ class FetchStateTests(unittest.TestCase):
         self.assertEqual(restored.candidate_count_before_filter, 25)
         self.assertEqual(restored.candidate_count_after_filter, 10)
         self.assertEqual(restored.last_window_start, datetime(2026, 4, 2, 12, 0, tzinfo=timezone.utc))
+
+    def test_announcement_state_round_trip(self) -> None:
+        state = build_announcement_fetch_state(
+            last_processed_announcement_date="2026-04-06",
+            report_date_local="2026-04-07",
+            candidate_count_before_filter=8,
+            candidate_count_after_filter=3,
+            updated_at_utc=datetime(2026, 4, 7, 0, 5, tzinfo=timezone.utc),
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = save_fetch_state(tmpdir, state)
+            payload = json.loads(Path(path).read_text(encoding="utf-8"))
+            restored = load_fetch_state(tmpdir)
+
+        self.assertEqual(payload["last_processed_announcement_date"], "2026-04-06")
+        self.assertIsNone(payload["last_successful_cutoff"])
+        self.assertIsNotNone(restored)
+        assert restored is not None
+        self.assertEqual(restored.last_processed_announcement_date, "2026-04-06")
+        self.assertIsNone(restored.last_successful_cutoff)
+
+    def test_load_fetch_state_accepts_legacy_last_successful_announcement_date_key(self) -> None:
+        payload = {
+            "updated_at_utc": "2026-04-07T00:05:00Z",
+            "source": "arxiv_announcement_list",
+            "report_date_local": "2026-04-07",
+            "candidate_count_before_filter": 8,
+            "candidate_count_after_filter": 3,
+            "last_successful_announcement_date": "2026-04-06",
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "fetch_state.json"
+            path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+            restored = load_fetch_state(tmpdir)
+
+        self.assertIsNotNone(restored)
+        assert restored is not None
+        self.assertEqual(restored.last_processed_announcement_date, "2026-04-06")
 
 
 if __name__ == "__main__":

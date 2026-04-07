@@ -41,6 +41,7 @@ class Config:
     language: str
     prompt_dir: str
     source_mode: str
+    announcement_lookback_days_if_no_state: int
     api_sort_by: str
     api_sort_order: str
     api_max_results_per_category: int
@@ -57,8 +58,10 @@ class Config:
     rerank_instruct: str
     analysis_model: str
     analysis_temperature: float
+    affiliation_web_fetch_top_per_domain: int
     affiliation_llm_fallback_enabled: bool
     affiliation_llm_fallback_model: str
+
 
 
 def iso_date(dt: datetime) -> str:

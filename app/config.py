@@ -6,6 +6,9 @@ import yaml
 
 from .models import Config, DomainBucket
 
+_SUPPORTED_SOURCE_MODES = {"announcement_list", "api_strict_window"}
+
+
 
 def _as_bool(value: object, default: bool = False) -> bool:
     if value is None:
@@ -17,11 +20,14 @@ def _as_bool(value: object, default: bool = False) -> bool:
     return bool(value)
 
 
+
 def _parse_source_mode(value: object) -> str:
-    mode = str(value or "api_strict_window").strip()
-    if mode != "api_strict_window":
-        raise ValueError(f"Unsupported source.mode: {mode}. Only 'api_strict_window' is supported.")
+    mode = str(value or "announcement_list").strip()
+    if mode not in _SUPPORTED_SOURCE_MODES:
+        supported = ", ".join(sorted(_SUPPORTED_SOURCE_MODES))
+        raise ValueError(f"Unsupported source.mode: {mode}. Supported modes: {supported}.")
     return mode
+
 
 
 def load_config(config_path: str | Path) -> Config:
@@ -29,6 +35,7 @@ def load_config(config_path: str | Path) -> Config:
     project = raw["project"]
     prompts = raw.get("prompts", {})
     source = raw.get("source", {})
+    source_announcement = source.get("announcement", {})
     source_api = source.get("api", {})
     source_fetch_state = source.get("fetch_state", {})
     retrieval = raw["retrieval"]
@@ -57,7 +64,8 @@ def load_config(config_path: str | Path) -> Config:
         timezone=project.get("timezone", "Asia/Shanghai"),
         language=project.get("language", "Chinese"),
         prompt_dir=prompts.get("dir", "prompts/backend"),
-        source_mode=_parse_source_mode(source.get("mode", "api_strict_window")),
+        source_mode=_parse_source_mode(source.get("mode", "announcement_list")),
+        announcement_lookback_days_if_no_state=int(source_announcement.get("lookback_days_if_no_state", 7)),
         api_sort_by=source_api.get("sort_by", "submittedDate"),
         api_sort_order=source_api.get("sort_order", "descending"),
         api_max_results_per_category=int(
@@ -79,6 +87,7 @@ def load_config(config_path: str | Path) -> Config:
         ),
         analysis_model=analysis["model"],
         analysis_temperature=float(analysis.get("temperature", 0.2)),
+        affiliation_web_fetch_top_per_domain=max(0, int(affiliation.get("web_fetch_top_per_domain", 5))),
         affiliation_llm_fallback_enabled=_as_bool(affiliation.get("llm_fallback_enabled"), default=True),
         affiliation_llm_fallback_model=affiliation.get("llm_fallback_model") or analysis["model"],
     )
