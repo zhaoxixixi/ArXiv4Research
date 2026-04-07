@@ -1,6 +1,6 @@
 project:
   title: ArXiv Research Assistant
-  top_k: 200
+  top_k: 300
   keep_days: 30
   timezone: Asia/Shanghai
   language: Chinese
@@ -110,7 +110,7 @@ retrieval:
         - vision transformer
     # You can add more domains and categories as needed.
     - name: multicore-realtime-scheduling
-      priority: 50
+      priority: 60
       filter_mode: hard
       categories:
         - cs.OS  # Operating Systems
@@ -137,7 +137,7 @@ retrieval:
         - reinforcement learning
         - energy-efficient
     - name: system-and-cyber-security
-      priority: 50
+      priority: 60
       filter_mode: hard
       categories:
         - cs.CR  # Cryptography and Security
@@ -204,7 +204,7 @@ relevance:
 rerank:
   mode: embedding_plus_qwen3_rerank
   model: qwen3-rerank
-  pool_size: 500
+  pool_size: 640
   instruct: >
     Given a research profile, rank candidate arXiv papers by:
     1) methodological relevance to symbolic regression, neural operators,
