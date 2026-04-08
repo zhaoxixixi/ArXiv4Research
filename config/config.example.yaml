@@ -1,6 +1,6 @@
 project:
   title: ArXiv Research Assistant
-  top_k: 300
+  top_k: 200
   keep_days: 30
   timezone: Asia/Shanghai
   language: Chinese
@@ -204,7 +204,7 @@ relevance:
 rerank:
   mode: embedding_plus_qwen3_rerank
   model: qwen3-rerank
-  pool_size: 640
+  pool_size: 500
   instruct: >
     Given a research profile, rank candidate arXiv papers by:
     1) methodological relevance to symbolic regression, neural operators,
