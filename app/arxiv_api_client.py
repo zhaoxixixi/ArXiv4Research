@@ -22,6 +22,7 @@ ARXIV_API_ENDPOINT = "https://export.arxiv.org/api/query"
 DEFAULT_API_SORT_BY = "submittedDate"
 DEFAULT_API_SORT_ORDER = "descending"
 DEFAULT_API_PAGE_SIZE = 100
+_ARXIV_HOST_PREFIX_RE = re.compile(r"^(?:https?://)?(?:www\.)?arxiv\.org", re.IGNORECASE)
 
 
 @dataclass
@@ -44,6 +45,34 @@ def normalize_arxiv_id(value: str) -> str:
         normalized = normalized.split("/abs/", 1)[1]
 
     return normalized.rsplit("v", 1)[0] if re.search(r"v\d+$", normalized) else normalized
+
+
+def normalize_arxiv_abs_url(value: str, fallback_paper_id: str = "") -> str:
+    """Normalize a paper link to the canonical HTTPS arXiv abs URL form."""
+
+    normalized = str(value or "").strip()
+    fallback_id = normalize_arxiv_id(fallback_paper_id)
+
+    if not normalized:
+        return f"https://arxiv.org/abs/{fallback_id}" if fallback_id else ""
+
+    if normalized.lower().startswith("arxiv:"):
+        paper_id = normalized.split(":", 1)[1].strip()
+        return f"https://arxiv.org/abs/{paper_id}" if paper_id else ""
+
+    if normalized.startswith("/abs/"):
+        paper_id = normalized.split("/abs/", 1)[1]
+        return f"https://arxiv.org/abs/{paper_id}" if paper_id else ""
+
+    if "/abs/" in normalized and _ARXIV_HOST_PREFIX_RE.search(normalized):
+        paper_id = normalized.split("/abs/", 1)[1]
+        return f"https://arxiv.org/abs/{paper_id}" if paper_id else ""
+
+    if "://" in normalized:
+        return normalized
+
+    paper_id = normalized.lstrip("/")
+    return f"https://arxiv.org/abs/{paper_id}" if paper_id else ""
 
 
 def _format_submitted_date(dt: datetime) -> str:
@@ -142,7 +171,7 @@ def _entry_to_paper(entry: dict, domain_buckets: list[DomainBucket]) -> Paper:
     title = html_unescape(entry.title).strip().replace("\n", " ")
     summary = html_unescape(entry.summary).strip().replace("\n", " ")
     categories = _parse_categories(entry)
-    link = entry.get("id", f"https://arxiv.org/abs/{paper_id}")
+    link = normalize_arxiv_abs_url(entry.get("id", ""), fallback_paper_id=paper_id)
 
     paper = Paper(
         paper_id=paper_id,

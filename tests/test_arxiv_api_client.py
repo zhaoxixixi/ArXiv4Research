@@ -14,6 +14,7 @@ from app.arxiv_api_client import (
     build_query_url,
     fetch_latest_by_categories,
     fetch_window_by_categories,
+    normalize_arxiv_abs_url,
     normalize_arxiv_id,
     parse_api_feed,
 )
@@ -147,13 +148,31 @@ class ArxivApiClientTests(unittest.TestCase):
         )
 
         self.assertEqual([paper.paper_id for paper in papers], ["2604.04702"])
-        self.assertEqual(papers[0].link, "http://arxiv.org/abs/2604.04702v1")
+        self.assertEqual(papers[0].link, "https://arxiv.org/abs/2604.04702v1")
 
     def test_normalize_arxiv_id_handles_modern_and_legacy_forms(self) -> None:
         self.assertEqual(normalize_arxiv_id("2604.04702v3"), "2604.04702")
         self.assertEqual(normalize_arxiv_id("http://arxiv.org/abs/2604.04702v1"), "2604.04702")
         self.assertEqual(normalize_arxiv_id("arXiv:2604.04702v2"), "2604.04702")
         self.assertEqual(normalize_arxiv_id("http://arxiv.org/abs/math/0301234v2"), "math/0301234")
+
+    def test_normalize_arxiv_abs_url_uses_https_abs_links(self) -> None:
+        self.assertEqual(
+            normalize_arxiv_abs_url("http://arxiv.org/abs/2604.04702v1"),
+            "https://arxiv.org/abs/2604.04702v1",
+        )
+        self.assertEqual(
+            normalize_arxiv_abs_url("arXiv:2604.04702v2"),
+            "https://arxiv.org/abs/2604.04702v2",
+        )
+        self.assertEqual(
+            normalize_arxiv_abs_url("/abs/math/0301234v2"),
+            "https://arxiv.org/abs/math/0301234v2",
+        )
+        self.assertEqual(
+            normalize_arxiv_abs_url("", fallback_paper_id="2604.04702"),
+            "https://arxiv.org/abs/2604.04702",
+        )
 
     def test_build_id_list_query_url_uses_canonical_non_versioned_ids(self) -> None:
         url = build_id_list_query_url(["2604.04702v1", "http://arxiv.org/abs/2604.04703v2"])

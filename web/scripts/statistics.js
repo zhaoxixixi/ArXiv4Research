@@ -6,7 +6,7 @@
   const { extractKeywordRanking, getPaperKeywordMeta, normalizeKeywordLabel } = keywords;
   const { applyTheme, getTheme } = theme;
   const { hydratePresetButtons } = window.ARA.shared.buttons;
-  const { derivePdfUrl, enableDialogOutsideClose, escapeHtml, formatAuthors, normalizePaperId, previewText } = utils;
+  const { derivePdfUrl, enableDialogOutsideClose, escapeHtml, formatAuthors, normalizeArxivAbsUrl, normalizePaperId, previewText } = utils;
 
   let availableDates = [];
   let currentDate = "";
@@ -53,7 +53,7 @@
               <h3 class="related-paper-title">${escapeHtml(paper.title)}</h3>
               <p class="related-paper-authors">${escapeHtml(formatAuthors(paper.authors || []))}</p>
               <div class="related-paper-snippet">${escapeHtml(previewText(detail.utils.getAiSection(paper.ai || {}, "zh").tldr || paper.summary || "", 170))}</div>
-              <div class="related-paper-actions"><span class="mini-hint">Score ${escapeHtml(String(paper.relevance_score ?? ""))}</span><div class="paper-modal-buttons"><a class="btn ghost resource-btn" href="${escapeHtml(paper.link || "#")}" target="_blank" rel="noreferrer" data-resource-icon="arxiv"></a><a class="btn ghost resource-btn" href="${escapeHtml(derivePdfUrl(paper.link))}" target="_blank" rel="noreferrer" data-resource-icon="pdf"></a></div></div>
+              <div class="related-paper-actions"><span class="mini-hint">Score ${escapeHtml(String(paper.relevance_score ?? ""))}</span><div class="paper-modal-buttons"><a class="btn ghost resource-btn" href="${escapeHtml(normalizeArxivAbsUrl(paper.link))}" target="_blank" rel="noreferrer" data-resource-icon="arxiv"></a><a class="btn ghost resource-btn" href="${escapeHtml(derivePdfUrl(paper.link))}" target="_blank" rel="noreferrer" data-resource-icon="pdf"></a></div></div>
             </article>
           `)
           .join("")

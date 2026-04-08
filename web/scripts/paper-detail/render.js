@@ -2,7 +2,7 @@
   const ARA = (window.ARA = window.ARA || {});
   const paperDetail = (ARA.paperDetail = ARA.paperDetail || {});
   const { PRESET_QUESTIONS } = ARA.shared.constants;
-  const { derivePdfUrl, escapeHtml, findPrimaryCodeLink, formatPublished, getDisplayKeywords } = ARA.shared.utils;
+  const { deriveHtmlUrl, derivePdfUrl, escapeHtml, findPrimaryCodeLink, formatPublished, getDisplayKeywords, normalizeArxivAbsUrl } = ARA.shared.utils;
 
   const buildAnalysisCard = (title, content, variant = "") =>
     content
@@ -69,9 +69,9 @@
       title: paper.title || "Paper Details",
       meta: `${scopeLabel || "Current view"} · ${currentIndex + 1} / ${totalPapers}`,
       codeLink,
-      paperLink: paper.link || "#",
+      paperLink: normalizeArxivAbsUrl(paper.link),
       pdfLink: derivePdfUrl(paper.link),
-      htmlLink: ARA.shared.utils.deriveHtmlUrl(paper.link),
+      htmlLink: deriveHtmlUrl(paper.link),
       body: `
         <div class="paper-detail">
           <section class="detail-section detail-overview">

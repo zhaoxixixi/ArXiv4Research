@@ -43,15 +43,39 @@
       : date.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" });
   };
 
+  /** Normalize arXiv abs URLs so saved/report data consistently uses HTTPS. */
+  const normalizeArxivAbsUrl = (link) => {
+    const value = String(link || "").trim();
+    if (!value || value === "#") return "#";
+
+    if (/^arxiv:/i.test(value)) {
+      const paperId = value.split(":", 2)[1]?.trim();
+      return paperId ? `https://arxiv.org/abs/${paperId}` : "#";
+    }
+
+    if (value.startsWith("/abs/")) return `https://arxiv.org${value}`;
+
+    const arxivAbsMatch = value.match(/^(?:https?:\/\/)?(?:www\.)?arxiv\.org\/abs\/([^?#]+)/i);
+    if (arxivAbsMatch) return `https://arxiv.org/abs/${arxivAbsMatch[1]}`;
+
+    if (/^https?:\/\//i.test(value)) return value.replace(/^http:\/\//i, "https://");
+
+    return `https://arxiv.org/abs/${value.replace(/^\/+/, "")}`;
+  };
+
   /** Convert arXiv abs URL to PDF URL. */
   const derivePdfUrl = (link) => {
-    if (!link) return "#";
-    const replaced = link.replace("/abs/", "/pdf/");
+    const absUrl = normalizeArxivAbsUrl(link);
+    if (absUrl === "#") return "#";
+    const replaced = absUrl.replace("/abs/", "/pdf/");
     return replaced.endsWith(".pdf") ? replaced : `${replaced}.pdf`;
   };
 
   /** Convert arXiv abs URL to HTML URL. */
-  const deriveHtmlUrl = (link) => (!link ? "#" : link.replace("/abs/", "/html/"));
+  const deriveHtmlUrl = (link) => {
+    const absUrl = normalizeArxivAbsUrl(link);
+    return absUrl === "#" ? "#" : absUrl.replace("/abs/", "/html/");
+  };
 
   /** Pick the primary code link for modal footer usage. */
   const findPrimaryCodeLink = (code = {}) => code.github?.[0] || code.huggingface?.[0] || code.colab?.[0] || "";
@@ -189,6 +213,7 @@
     formatAffiliations,
     normalizePaperId,
     formatPublished,
+    normalizeArxivAbsUrl,
     derivePdfUrl,
     deriveHtmlUrl,
     findPrimaryCodeLink,
