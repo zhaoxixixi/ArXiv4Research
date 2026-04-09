@@ -27,7 +27,7 @@ This means a public visitor can read the report directly, while deeper personali
 - **Discovery source**: arXiv official category `/recent` pages
 - **Metadata source**: arXiv API `id_list` queries
 - **Incremental state semantics**: progress is tracked by processed **announcement date**, not by API submitted timestamp
-- **GitHub Actions schedule**: every day at **22:00 Asia/Shanghai**
+- **GitHub Actions schedule**: every day at **03:00 Asia/Shanghai**
 
 The older `api_strict_window` mode is still available as a compatibility / fallback mode, but it is no longer the default production path.
 
@@ -198,7 +198,7 @@ In other words, your concern is correct: normal deployment users should think in
 
 Current scheduled publishing runs at:
 
-- **22:00 Asia/Shanghai** every day
+- **03:00 Asia/Shanghai** every day
 
 ## Project Structure
 

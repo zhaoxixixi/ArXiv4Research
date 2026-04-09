@@ -91,7 +91,7 @@ git rm --cached config/config.yaml
 
 当前仓库的 workflow 目标是：
 
-- 每天 **22:00 Asia/Shanghai** 自动运行
+- 每天 **03:00 Asia/Shanghai** 自动运行
 
 首次发布时建议先手动测试一次：
 
