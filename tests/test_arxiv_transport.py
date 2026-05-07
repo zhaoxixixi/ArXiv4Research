@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import unittest
 from urllib.error import HTTPError
 from unittest.mock import patch
@@ -63,6 +64,7 @@ class ArxivTransportTests(unittest.TestCase):
             patch("app.arxiv_transport.urlopen", side_effect=responses),
             patch("app.arxiv_transport.time.monotonic", side_effect=[100.0, 100.0, 104.0, 104.0]),
             patch("app.arxiv_transport.time.sleep") as mocked_sleep,
+            patch("app.arxiv_transport.random.random", return_value=0.75),
         ):
             body, charset = arxiv_transport.fetch_arxiv_response(
                 "https://export.arxiv.org/api/query?search_query=cat:math.PR"
@@ -70,7 +72,8 @@ class ArxivTransportTests(unittest.TestCase):
 
         self.assertEqual(body, b"retry-ok")
         self.assertEqual(charset, "utf-8")
-        mocked_sleep.assert_called_once_with(arxiv_transport.ARXIV_RETRY_BASE_DELAY_SECONDS)
+        # With jitter: base_delay * (2^0) * 0.75 = 6.0 * 0.75 = 4.5
+        mocked_sleep.assert_called_once_with(4.5)
 
     def test_fetch_arxiv_text_returns_empty_when_optional_html_fetch_fails(self) -> None:
         with patch(

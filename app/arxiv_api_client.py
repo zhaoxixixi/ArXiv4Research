@@ -401,7 +401,7 @@ def fetch_papers_by_ids(
         return []
 
     papers_by_id: dict[str, Paper] = {}
-    safe_batch_size = max(1, int(batch_size))
+    safe_batch_size = max(1, min(int(batch_size), 30))
     for start in range(0, len(unique_ids), safe_batch_size):
         batch = unique_ids[start : start + safe_batch_size]
         url = build_id_list_query_url(batch, max_results=len(batch))
