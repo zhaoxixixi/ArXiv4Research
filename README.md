@@ -8,6 +8,8 @@ English | [中文](README_zh.md)
 
 *Build your own domain-specific arXiv daily digest — define your research areas, and let the pipeline discover, rank, summarize, and publish papers automatically.*
 
+> Inspired by [dw-dengwei/daily-arXiv-ai-enhanced](https://github.com/dw-dengwei/daily-arXiv-ai-enhanced), extended with domain-balanced selection, bilingual analysis, and announcement-list-based discovery.
+
 <p align="center">
   <img src="docs/screenshots/main-page.svg" alt="ArXiv4Research main page" width="80%" />
 </p>

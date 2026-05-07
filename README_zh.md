@@ -8,6 +8,8 @@
 
 *搭建属于你自己的领域专属 arXiv 每日摘要 —— 定义研究方向，流水线自动发现、排序、总结、发布论文。*
 
+> 本项目灵感源自 [dw-dengwei/daily-arXiv-ai-enhanced](https://github.com/dw-dengwei/daily-arXiv-ai-enhanced)，在此基础上扩展了领域平衡选取、双语 AI 分析和基于公告列表的论文发现。
+
 <p align="center">
   <img src="docs/screenshots/main-page.svg" alt="ArXiv4Research 主页面" width="80%" />
 </p>
