@@ -383,7 +383,7 @@ def fetch_papers_by_ids(
     paper_ids: Iterable[str],
     domain_buckets: list[DomainBucket],
     global_keywords: list[str],
-    batch_size: int = 50,
+    batch_size: int = 20,
     apply_filters: bool = False,
 ) -> list[Paper]:
     """Fetch explicit paper ids from the arXiv API in small batches."""
@@ -401,7 +401,7 @@ def fetch_papers_by_ids(
         return []
 
     papers_by_id: dict[str, Paper] = {}
-    safe_batch_size = max(1, min(int(batch_size), 30))
+    safe_batch_size = max(1, min(int(batch_size), 20))
     for start in range(0, len(unique_ids), safe_batch_size):
         batch = unique_ids[start : start + safe_batch_size]
         url = build_id_list_query_url(batch, max_results=len(batch))

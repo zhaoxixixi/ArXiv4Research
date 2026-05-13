@@ -20,11 +20,13 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     env:
       OUTPUT_DATA_DIR: build/generated-data
       SITE_OUTPUT_DIR: build/site
       PUBLISH_BRANCH: gh-pages
       TZ: Asia/Shanghai
+      ARXIV_USER_AGENT: "ArXiv4Research/0.1 (polite client; mailto:hengrao02@outlook.com)"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
